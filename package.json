@@ -1,6 +1,6 @@
 {
   "name": "graph-tutorial",
-  "version": "0.2.0",
+  "version": "0.2.7",
   "private": true,
   "description": "EBPM 関連 OSS と日本の総人口データを可視化するエビデンス・パイプラインのチュートリアル",
   "workspaces": [

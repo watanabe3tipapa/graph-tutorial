@@ -1,6 +1,6 @@
 # graph-tutorial
 
-[![Version](https://img.shields.io/badge/version-v0.2.0-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.7-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
 [![Issues](https://img.shields.io/github/issues/watanabe3tipapa/graph-tutorial.svg)](https://github.com/watanabe3tipapa/graph-tutorial/issues)
 
 **EBPM. Collect data relentlessly, visualize it.**
@@ -49,6 +49,8 @@ codified pipeline of "fetch → shape → plot → publish".
 - **Loose-leaf notebook LP**: handwriting-style ruled lines, binder holes, and 6 divider tabs
 - **On-demand charts**: Chart.js charts for category / stars / language / activity
 - **WEB-UI (practical console)**: catalog search, sort, CSV/JSON export, detail modal, favorites (localStorage), URL-hash state sharing
+- **Data freshness badges**: shows the last update of each dataset and warns when data is old (works on GitHub Pages too)
+- **Collector run WEB-UI**: run each collector with one click from the "Data Collection" tab (server only)
 - **Accuracy absolutism**: `npm run smoke` data-integrity smoke tests run on every CI run
 - **Modern SPA**: Vite + React + TypeScript (npm workspaces monorepo)
 
@@ -121,15 +123,19 @@ graph-tutorial/
         ├── repoStats.ts            # chart aggregation (pure functions, tested)
         └── components/             # Consideration / Framework / Population / EBPM / Catalog / Usage
             ├── Catalog.tsx         # search, sort, export, favorites
-            └── RepoModal.tsx       # repository detail modal
+            ├── RepoModal.tsx       # repository detail modal
+            ├── FreshnessBadge.tsx  # data freshness badge
+            └── CollectorControls.tsx # collector run WEB-UI
 ```
 
 ## API
 
 | Endpoint | Description |
 |---|---|
-| `GET /api/population` | Japan total population (labels / data / source / unit / isLive) |
-| `GET /api/repos` | EBPM repository catalog (categories / repos / isLive / sourceUrl) |
+| `GET /api/population` | Japan total population (labels / data / source / unit / isLive / collectedAt) |
+| `GET /api/repos` | EBPM repository catalog (categories / repos / isLive / sourceUrl / collectedAt) |
+| `GET /api/collectors` | Registered collectors (id / name / cron / collectedAt / stale) |
+| `POST /api/collect/:id` | Run a collector (returns ok / skipped / error as JSON) |
 
 ## Data Sources
 
@@ -143,7 +149,7 @@ graph-tutorial/
 ## Tests
 
 ```sh
-npm test        # Vitest (16 tests)
+npm test        # Vitest (18 tests)
 npm run lint    # ESLint
 npm run build   # typecheck + Vite build
 npm run smoke   # data-integrity smoke test

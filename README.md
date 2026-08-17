@@ -1,6 +1,6 @@
 # graph-tutorial
 
-[![Version](https://img.shields.io/badge/version-v0.2.0-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.7-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
 [![Issues](https://img.shields.io/github/issues/watanabe3tipapa/graph-tutorial.svg)](https://github.com/watanabe3tipapa/graph-tutorial/issues)
 
 **EBPM。データを、たゆまず集め、可視化する。**
@@ -47,6 +47,8 @@ EBPM は「政策をエビデンスで設計し、検証する」ことです。
 - **ルーズリーフ調 LP**: 手書き風罫線 + バインダーホール + 仕切りタブの6タブ構成
 - **都度生成グラフ**: Chart.js でカテゴリ / スター数 / 言語 / 更新年別を切り替え描画
 - **WEB-UI（実用コンソール）**: カタログ検索・ソート・CSV/JSON 出力・詳細モーダル・お気に入り（localStorage）・URL ハッシュで状態共有
+- **データ鮮度バッジ**: 各データの最終更新日を表示し、古いデータには注意を喚起（GitHub Pages でも動作）
+- **コレクタ実行 WEB-UI**: 「データ収集」タブから各コレクタをワンクリック実行（サーバ起動時のみ）
 - **正確性至上主義**: `npm run smoke` によるデータ整合性スモークテストを CI で毎回実行
 - **モダンSPA**: Vite + React + TypeScript（npm workspaces のモノレポ）
 
@@ -119,15 +121,19 @@ graph-tutorial/
         ├── repoStats.ts            # グラフ集計（純関数・テスト済み）
         └── components/             # 考察 / データ収集 / 人口 / EBPM / カタログ / 使い方
             ├── Catalog.tsx         # 検索・ソート・出力・お気に入り
-            └── RepoModal.tsx       # リポジトリ詳細モーダル
+            ├── RepoModal.tsx       # リポジトリ詳細モーダル
+            ├── FreshnessBadge.tsx  # データ鮮度バッジ
+            └── CollectorControls.tsx # コレクタ実行 WEB-UI
 ```
 
 ## API
 
 | エンドポイント | 内容 |
 |---|---|
-| `GET /api/population` | 日本の総人口（labels / data / source / unit / isLive） |
-| `GET /api/repos` | EBPM リポジトリカタログ（categories / repos / isLive / sourceUrl） |
+| `GET /api/population` | 日本の総人口（labels / data / source / unit / isLive / collectedAt） |
+| `GET /api/repos` | EBPM リポジトリカタログ（categories / repos / isLive / sourceUrl / collectedAt） |
+| `GET /api/collectors` | 登録コレクタ一覧（id / name / cron / collectedAt / stale） |
+| `POST /api/collect/:id` | コレクタを実行（成功 / スキップ / 失敗を JSON で返却） |
 
 ## データ源
 
@@ -141,7 +147,7 @@ graph-tutorial/
 ## テスト
 
 ```sh
-npm test        # Vitest（16 tests）
+npm test        # Vitest（18 tests）
 npm run lint    # ESLint
 npm run build   # 型チェック + Vite ビルド
 npm run smoke   # データ整合性スモークテスト
