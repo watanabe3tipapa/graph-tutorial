@@ -164,6 +164,20 @@ body {
   line-height: 1.9;
 }
 
+.leaf-content ol {
+  line-height: 1.9;
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.leaf-content ol li {
+  margin: 10px 0;
+}
+
+.leaf-content ol li strong {
+  color: #14532d;
+}
+
 .conclusion {
   background: #e6f7ff;
   border-left: 4px solid #00b7ff;

@@ -60,6 +60,12 @@ describe('App', () => {
         name: '考察: EBPM に関連するツールとは、どのようなものを構築すればよいのか',
       }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: '提唱: セルフビルドのすすめ' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/第三者に委ねるべきではない/),
+    ).toBeInTheDocument()
   })
 
   it('日本の人口タブで人口データを表示する', async () => {
