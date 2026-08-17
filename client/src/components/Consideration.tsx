@@ -144,7 +144,7 @@ function Consideration({ onNavigate }: Props) {
         <button className="card" onClick={() => onNavigate('framework')}>
           <h3>自律データ収集</h3>
           <p>
-            e-Stat と GitHub リソースを定期収集。劣化処理とスタル検知で収集元の変化にも止まらない。
+            e-Stat と GitHub リソースを定期収集。劣化処理とステイル検知で収集元の変化にも止まらない。
           </p>
         </button>
         <button className="card" onClick={() => onNavigate('framework')}>

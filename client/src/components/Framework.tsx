@@ -14,7 +14,7 @@ function Framework() {
           <strong>スケジュール</strong>: node-cron による定期実行（例: 毎日3時）
         </li>
         <li>
-          <strong>起動時スタル検知</strong>: データが古ければサーバ起動時に自動更新
+          <strong>起動時ステイル検知</strong>: データが古ければサーバ起動時に自動更新
         </li>
         <li>
           <strong>劣化処理</strong>: 取得失敗時は既存データを保持し、止まらない
@@ -36,7 +36,7 @@ function Framework() {
 │       └── collector.js        # e-Stat API（appId があれば live）
 ├── data/                       # 各コレクタの出力（collectedAt 付き）
 ├── lib/
-│   └── collector-registry.js   # 自動発見 + 実行 + cron + スタル検知
+│   └── collector-registry.js   # 自動発見 + 実行 + cron + ステイル検知
 └── scripts/
     └── run-collectors.js       # CLI: 全実行 / 個別実行`}</pre>
 

@@ -44,7 +44,7 @@ graph-tutorial/
 │   │   ├── ebpm-repos/collector.js
 │   │   └── estat-population/collector.js
 │   ├── lib/
-│   │   ├── collector-registry.js   # 自動発見 + 実行 + cron + スタル検知
+│   │   ├── collector-registry.js   # 自動発見 + 実行 + cron + ステイル検知
 │   │   ├── estat.js                # e-Stat 取得 + スナップショット/フォールバック
 │   │   └── github.js               # GitHub API 取得 + フォールバック
 │   ├── data/                       # コレクタ出力（collectedAt 付き）
@@ -77,7 +77,7 @@ module.exports = {
   id: 'ebpm-repos',
   name: 'EBPM 関連 GitHub リソース',
   cron: '0 3 * * *',        // 定期実行時刻
-  staleAfterMs: 86400000,   // スタル判定（既定 24h）
+  staleAfterMs: 86400000,   // ステイル判定（既定 24h）
   async collect() { ... },  // 取得 + 正規化
   validate(data) { ... },   // スキーマ検証（任意）
 }
@@ -86,7 +86,7 @@ module.exports = {
 ### 自律性の4層
 
 1. **スケジュール**: node-cron で `cron` 時刻に定期実行
-2. **起動時スタル検知**: サーバ起動時、`collectedAt` が古いコレクタを自動更新
+2. **起動時ステイル検知**: サーバ起動時、`collectedAt` が古いコレクタを自動更新
 3. **劣化処理**: 取得失敗時は既存データを保持（空上書きしない）
 4. **CLI / CI**: `npm run collect` で手動・CI からも実行
 
@@ -122,7 +122,7 @@ LP の「考察」タブでは、EBPM ツールのあるべき姿を6点で論�
 - **日本の人口**: 年範囲選択・年別テーブル・CSV 出力
 - **URL ハッシュ同期**: `#repos?cat=...` / `#catalog?q=...&sort=...` で状態を共有・復元
 - **データ鮮度バッジ**（`FreshnessBadge.tsx`）: `collectedAt` から「データ更新: YYYY-MM-DD」を表示。7日以上経過で「古い可能性があります」と警告（静的フォールバックにも `collectedAt` を同梱し、Pages でも動作）
-- **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「データ収集」タブでコレクタ一覧（cron / 最終更新 / スタル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
+- **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「データ収集」タブでコレクタ一覧（cron / 最終更新 / ステイル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
 
 ## API
 
