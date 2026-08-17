@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ReposChart from './ReposChart'
 import { fetchRepos } from '../api'
+import { readHashParams, setHash } from '../hash'
 import type { ChartType, ReposResponse } from '../types'
 import type { Tab } from '../App'
 
@@ -22,7 +23,10 @@ function ReposView({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
     fetchRepos()
       .then((r) => {
         setRes(r)
-        setSelected(new Set(r.categories))
+        const cats = readHashParams().get('cat')
+        setSelected(
+          cats ? new Set(cats.split(',').filter(Boolean)) : new Set(r.categories),
+        )
       })
       .catch((e: unknown) => {
         setError(e instanceof Error ? e.message : 'データの取得に失敗しました')
@@ -42,15 +46,14 @@ function ReposView({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   }, [res, selected])
 
   const toggle = (cat: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(cat)) {
-        next.delete(cat)
-      } else {
-        next.add(cat)
-      }
-      return next
-    })
+    const next = new Set(selected)
+    if (next.has(cat)) {
+      next.delete(cat)
+    } else {
+      next.add(cat)
+    }
+    setSelected(next)
+    setHash('repos', { cat: [...next].join(',') })
   }
 
   if (error) {

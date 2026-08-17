@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Consideration from './components/Consideration'
 import Framework from './components/Framework'
 import PopulationView from './components/PopulationView'
 import ReposView from './components/ReposView'
 import Catalog from './components/Catalog'
 import Usage from './components/Usage'
+import { currentHashTab, setHash } from './hash'
 
 export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'catalog' | 'usage'
 
@@ -17,8 +18,22 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'usage', label: '使い方' },
 ]
 
+function initialTab(): Tab {
+  const h = currentHashTab()
+  return TABS.some((t) => t.id === h) ? (h as Tab) : 'consideration'
+}
+
 function App() {
-  const [tab, setTab] = useState<Tab>('consideration')
+  const [tab, setTab] = useState<Tab>(initialTab)
+  const first = useRef(true)
+
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    setHash(tab)
+  }, [tab])
 
   return (
     <div className="app">

@@ -37,6 +37,8 @@ codified pipeline of "fetch → shape → plot → publish".
 2. **Democratize analytical methods** — bring causal inference, etc., to practitioners
 3. **Guarantee reproducibility with code** — an open pipeline can be reproduced by anyone
 4. **Keep tracking evidence** — automated collection keeps everything up to date
+5. **Relentless smoke tests (accuracy absolutism)** — data sources quietly break; correctness must be guarded by tests
+6. **The case for self-build** — EBPM tools should be built and used by yourself. Outsourcing to consultants is to be avoided: knowledge never stays in the organization, operations become contract-bound, and everything turns into a black box
 
 ## Features
 
@@ -44,8 +46,10 @@ codified pipeline of "fetch → shape → plot → publish".
 - **Startup stale detection**: refreshes data automatically when it is outdated
 - **Degradation handling**: keeps existing data on API/network failure
 - **Hybrid data sources**: live API (`ESTAT_APP_ID` / `GITHUB_TOKEN`) + static fallback
-- **Loose-leaf notebook LP**: handwriting-style ruled lines, binder holes, and 5 divider tabs
+- **Loose-leaf notebook LP**: handwriting-style ruled lines, binder holes, and 6 divider tabs
 - **On-demand charts**: Chart.js charts for category / stars / language / activity
+- **WEB-UI (practical console)**: catalog search, sort, CSV/JSON export, detail modal, favorites (localStorage), URL-hash state sharing
+- **Accuracy absolutism**: `npm run smoke` data-integrity smoke tests run on every CI run
 - **Modern SPA**: Vite + React + TypeScript (npm workspaces monorepo)
 
 ## Quick Start
@@ -111,9 +115,13 @@ graph-tutorial/
 │   └── scripts/run-collectors.js   # CLI
 └── client/                 # Vite + React + TypeScript SPA
     └── src/
-        ├── App.tsx                 # loose-leaf tab navigation
+        ├── App.tsx                 # loose-leaf tab navigation (URL-hash sync)
+        ├── hash.ts                 # URL sync of tab / filter state
+        ├── download.ts             # CSV / JSON export (tested)
         ├── repoStats.ts            # chart aggregation (pure functions, tested)
-        └── components/             # Consideration / Framework / Population / EBPM / Usage
+        └── components/             # Consideration / Framework / Population / EBPM / Catalog / Usage
+            ├── Catalog.tsx         # search, sort, export, favorites
+            └── RepoModal.tsx       # repository detail modal
 ```
 
 ## API
@@ -135,9 +143,10 @@ graph-tutorial/
 ## Tests
 
 ```sh
-npm test        # Vitest (7 tests)
+npm test        # Vitest (16 tests)
 npm run lint    # ESLint
 npm run build   # typecheck + Vite build
+npm run smoke   # data-integrity smoke test
 ```
 
 ## License
