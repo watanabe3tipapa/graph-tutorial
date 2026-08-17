@@ -13,10 +13,17 @@ var registry = require('./lib/collector-registry');
 
 var app = express();
 
+app.disable('etag');
+
 app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use('/api', function(req, res, next) {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 
 app.get('/api/population', function(req, res, next) {
   estat.getPopulationData()

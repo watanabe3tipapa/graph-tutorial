@@ -4,7 +4,7 @@ import reposFallback from './static/ebpm-repos.json'
 
 export async function fetchPopulation(): Promise<PopulationData> {
   try {
-    const res = await fetch('/api/population')
+    const res = await fetch('/api/population', { cache: 'no-store' })
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`)
     }
@@ -16,7 +16,7 @@ export async function fetchPopulation(): Promise<PopulationData> {
 
 export async function fetchRepos(): Promise<ReposResponse> {
   try {
-    const res = await fetch('/api/repos')
+    const res = await fetch('/api/repos', { cache: 'no-store' })
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`)
     }

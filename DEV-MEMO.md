@@ -121,13 +121,72 @@ LP の「考察」タブでは、EBPM ツールのあるべき姿を6点で論�
 - **お気に入り**（localStorage `ebpm-favorites` + 「お気に入りのみ」絞り込み）
 - **日本の人口**: 年範囲選択・年別テーブル・CSV 出力
 - **URL ハッシュ同期**: `#repos?cat=...` / `#catalog?q=...&sort=...` で状態を共有・復元
+- **データ鮮度バッジ**（`FreshnessBadge.tsx`）: `collectedAt` から「データ更新: YYYY-MM-DD」を表示。7日以上経過で「古い可能性があります」と警告（静的フォールバックにも `collectedAt` を同梱し、Pages でも動作）
+- **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「データ収集」タブでコレクタ一覧（cron / 最終更新 / スタル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
 
 ## API
 
 | エンドポイント | 内容 |
 |----------------|------|
-| `GET /api/population` | 日本の総人口（labels/data/source/unit/isLive） |
-| `GET /api/repos` | EBPM リポジトリカタログ（categories/repos/isLive/sourceUrl） |
+| `GET /api/population` | 日本の総人口（labels/data/source/unit/isLive/collectedAt） |
+| `GET /api/repos` | EBPM リポジトリカタログ（categories/repos/isLive/sourceUrl/collectedAt） |
+| `GET /api/collectors` | 登録コレクタ一覧（id/name/cron/collectedAt/stale） |
+| `POST /api/collect/:id` | コレクタを実行（ok / skipped / error を JSON で返却） |
+
+## トラブルシューティング: API の 304（Not Modified）問題
+
+### 症状
+
+ブラウザで WEB-UI を操作中、`/api/*` のレスポンスが **304 Not Modified** になり、
+本来の JSON が返ってこない。結果として以下の誤動作が発生する。
+
+- `/api/population` / `/api/repos` が 304 → クライアントが `res.ok === false` と判定し、
+  本来の API データではなく**静的フォールバック**を表示してしまう
+- `/api/collectors` が 304 → コレクタ実行 UI が「サーバ起動時のみ利用できます」と
+  誤った劣化表示をしてしまう
+
+### 原因
+
+Express はデフォルトで全レスポンスに **weak ETag**（`W/"..."`）を付与する。
+ブラウザは `If-None-Match` で再検証（revalidation）を送り、内容が同一なら
+サーバは **304 + 空ボディ** を返す。
+
+`fetch()` の既定キャッシュモードではこの 304 がそのまま `Response` として解決され、
+`response.ok` は **false** になる（304 は 200–299 に含まれない）。
+そのため「レスポンスが異常」と誤判定してフォールバック / 劣化表示に落ちていた。
+
+### 修正（サーバ + クライアント両側で対策）
+
+**サーバ側**（`server/app.js`）: API 応答をキャッシュ対象から外す
+
+```js
+app.disable('etag');          // 全レスポンスの ETag 付与を無効化
+
+// /api 配下はキャッシュ禁止（ヘッダ: Cache-Control: no-store）
+app.use('/api', function(req, res, next) {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+```
+
+**クライアント側**: API の `fetch` すべてに `cache: 'no-store'` を付与
+（プロキシ等の中間キャッシュでも 304 を防ぐ二重の保険）
+
+- `client/src/api.ts`（`fetchPopulation` / `fetchRepos`）
+- `client/src/components/CollectorControls.tsx`（一覧取得 / 実行POST）
+
+### 検証方法
+
+```bash
+COLLECTOR_DISABLED=1 PORT=3999 node server/bin/www &
+# 初回取得 → レスポンスヘッダに ETag が無く、Cache-Control: no-store があること
+curl -sD - -o /dev/null http://localhost:3999/api/collectors
+# If-None-Match で再検証しても 304 ではなく 200 が返ること
+curl -s -o /dev/null -w "%{http_code}\n" \
+  -H "If-None-Match: W/\"dummy\"" http://localhost:3999/api/collectors
+```
+
+修正前は再検証で `304`、修正後は `200` が返る。
 
 ## 環境変数
 

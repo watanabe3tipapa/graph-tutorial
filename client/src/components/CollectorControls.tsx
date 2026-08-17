@@ -23,7 +23,7 @@ function CollectorControls() {
   const [results, setResults] = useState<Record<string, RunResult>>({})
 
   const load = useCallback(() => {
-    fetch('/api/collectors')
+    fetch('/api/collectors', { cache: 'no-store' })
       .then((res) => {
         if (!res.ok) throw new Error('HTTP ' + res.status)
         return res.json()
@@ -39,7 +39,7 @@ function CollectorControls() {
   const run = (c: CollectorInfo) => {
     setRunning(c.id)
     setResults((prev) => ({ ...prev, [c.id]: { id: c.id, status: 'running' } }))
-    fetch(`/api/collect/${c.id}`, { method: 'POST' })
+    fetch(`/api/collect/${c.id}`, { method: 'POST', cache: 'no-store' })
       .then(async (res) => {
         const data = (await res.json()) as RunResult
         if (!res.ok) {
