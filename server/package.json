@@ -2,6 +2,7 @@
   "name": "graph-tutorial-server",
   "version": "0.3.0",
   "private": true,
+  "license": "GPL-2.0",
   "main": "app.js",
   "scripts": {
     "start": "node bin/www",

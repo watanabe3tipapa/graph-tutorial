@@ -199,7 +199,7 @@ npm run smoke   # データ整合性スモークテスト
 
 ## ライセンス
 
-本リポジトリのライセンスは現在未指定です。
+GPL v2（GNU General Public License v2）。詳細は [LICENSE](LICENSE) を参照。
 
 ## 連絡先
 

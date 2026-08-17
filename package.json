@@ -2,6 +2,7 @@
   "name": "graph-tutorial",
   "version": "0.3.0",
   "private": true,
+  "license": "GPL-2.0",
   "description": "EBPM 関連 OSS と日本の総人口データを可視化するエビデンス・パイプラインのチュートリアル",
   "workspaces": [
     "server",

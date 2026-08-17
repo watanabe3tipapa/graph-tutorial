@@ -201,7 +201,7 @@ npm run smoke   # data-integrity smoke test
 
 ## License
 
-This repository does not currently specify a license.
+GPL v2 (GNU General Public License v2). See [LICENSE](LICENSE).
 
 ## Contact
 
