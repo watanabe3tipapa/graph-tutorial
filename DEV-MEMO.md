@@ -157,17 +157,26 @@ Express はデフォルトで全レスポンスに **weak ETag**（`W/"..."`）�
 
 ### 修正（サーバ + クライアント両側で対策）
 
-**サーバ側**（`server/app.js`）: API 応答をキャッシュ対象から外す
+**サーバ側**（`server/app.js`）: レスポンスをキャッシュ対象から外す
 
 ```js
-app.disable('etag');          // 全レスポンスの ETag 付与を無効化
+app.disable('etag');          // アプリ全体の ETag 付与を無効化
 
 // /api 配下はキャッシュ禁止（ヘッダ: Cache-Control: no-store）
 app.use('/api', function(req, res, next) {
   res.set('Cache-Control', 'no-store');
   next();
 });
+
+// 静的配信（index.html 等）も ETag を無効化（express.static は独自に ETag を付与するため）
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath, { etag: false }));
+}
 ```
+
+> 補足: `app.disable('etag')` は Express のルートレスポンスにのみ効く。
+> `express.static`（`serve-static`）は独自の ETag 付与・`If-None-Match` 判定を行うため、
+> 静的ファイルの 304 を消すには `express.static(path, { etag: false })` の指定が別途必要。
 
 **クライアント側**: API の `fetch` すべてに `cache: 'no-store'` を付与
 （プロキシ等の中間キャッシュでも 304 を防ぐ二重の保険）
