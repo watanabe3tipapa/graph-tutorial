@@ -14,6 +14,7 @@ const populationMock = {
   labels: ['2020', '2021'],
   data: [125710000, 125502000],
   isLive: false,
+  collectedAt: '2026-08-16T00:00:00.000Z',
 }
 
 const reposMock = {
@@ -44,6 +45,7 @@ const reposMock = {
   ],
   isLive: false,
   sourceUrl: 'https://example.test/',
+  collectedAt: '2026-08-16T00:00:00.000Z',
 }
 
 describe('App', () => {
@@ -83,6 +85,22 @@ describe('App', () => {
 
     expect(await screen.findByText('日本の総人口の推移')).toBeInTheDocument()
     expect(screen.getByTestId('badge')).toHaveTextContent('静的データ')
+  })
+
+  it('日本の人口タブでデータ鮮度バッジを表示する', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('tab', { name: '日本の人口' }))
+
+    expect(await screen.findByText(/データ更新: 2026-08-16/)).toBeInTheDocument()
+  })
+
+  it('データ収集タブでコレクタ実行 UI がサーバ未接続時に劣化表示される', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('tab', { name: 'データ収集' }))
+
+    expect(await screen.findByText(/サーバ起動時のみ利用できます/)).toBeInTheDocument()
   })
 
   it('EBPMリポジトリタブでカテゴリフィルタを表示する', async () => {

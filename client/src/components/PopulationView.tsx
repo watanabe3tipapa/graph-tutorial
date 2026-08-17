@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import PopulationChart from './PopulationChart'
+import FreshnessBadge from './FreshnessBadge'
 import { fetchPopulation } from '../api'
 import { downloadCsv } from '../download'
 import type { PopulationData } from '../types'
@@ -62,6 +63,7 @@ function PopulationView() {
           ? 'e-Stat API の最新データを表示中'
           : 'e-Stat API 未設定のため静的データを表示中（ESTAT_APP_ID を設定すると最新データになります）'}
       </p>
+      <FreshnessBadge collectedAt={data.collectedAt} />
 
       <div className="range-controls">
         <label className="filter-block">

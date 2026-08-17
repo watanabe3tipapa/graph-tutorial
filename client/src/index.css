@@ -529,6 +529,73 @@ code {
   background: #f3f5f6;
 }
 
+/* ---- freshness ---- */
+.freshness-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #e6f7ff;
+  color: #0b7285;
+}
+
+.freshness-badge.stale {
+  background: #fff0f0;
+  color: #c92a2a;
+}
+
+/* ---- collector controls ---- */
+.collector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.collector-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #e3e6e8;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.collector-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.collector-meta {
+  font-size: 12px;
+  color: #777;
+}
+
+.collector-result {
+  font-size: 12px;
+}
+
+.collector-result.ok {
+  color: #2b8a3e;
+}
+
+.collector-result.error {
+  color: #c92a2a;
+}
+
+.collector-result.skipped {
+  color: #a86b00;
+}
+
+.collector-result.running {
+  color: #0b7285;
+}
+
 /* ---- catalog ---- */
 .catalog-category {
   margin: 24px 0;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import RepoModal from './RepoModal'
+import FreshnessBadge from './FreshnessBadge'
 import { fetchRepos } from '../api'
 import { readHashParams, setHash } from '../hash'
 import { downloadCsv, downloadJson } from '../download'
@@ -162,6 +163,7 @@ function Catalog() {
           ? 'GitHub API の最新値を表示中'
           : '静的カタログを表示中（GITHUB_TOKEN を設定すると最新値を取得）'}
       </p>
+      <FreshnessBadge collectedAt={res.collectedAt} />
       <p className="source">
         {res.repos.length}リポジトリ / {res.categories.length}カテゴリ
         {res.sourceUrl ? (

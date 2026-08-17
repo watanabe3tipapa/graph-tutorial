@@ -1,3 +1,5 @@
+import CollectorControls from './CollectorControls'
+
 function Framework() {
   return (
     <section className="leaf-content">
@@ -21,6 +23,9 @@ function Framework() {
           <strong>CLI 実行</strong>: <code>npm run collect</code> で手動・CI からも実行可能
         </li>
       </ul>
+
+      <h2>コレクタ実行（WEB-UI）</h2>
+      <CollectorControls />
 
       <h2>アーキテクチャ</h2>
       <pre>{`server/

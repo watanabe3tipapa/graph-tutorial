@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ReposChart from './ReposChart'
+import FreshnessBadge from './FreshnessBadge'
 import { fetchRepos } from '../api'
 import { readHashParams, setHash } from '../hash'
 import type { ChartType, ReposResponse } from '../types'
@@ -71,6 +72,7 @@ function ReposView({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
           ? 'GitHub API の最新値を表示中'
           : '静的カタログを表示中（GITHUB_TOKEN を設定すると最新値を取得）'}
       </p>
+      <FreshnessBadge collectedAt={res.collectedAt} />
 
       <div className="filters">
         <div className="filter-block">

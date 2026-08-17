@@ -9,6 +9,7 @@ var helmet = require('helmet');
 
 var estat = require('./lib/estat');
 var github = require('./lib/github');
+var registry = require('./lib/collector-registry');
 
 var app = express();
 
@@ -31,6 +32,36 @@ app.get('/api/repos', function(req, res, next) {
       res.json(data);
     })
     .catch(next);
+});
+
+app.get('/api/collectors', function(req, res, next) {
+  var list = registry.discover().map(function(c) {
+    var existing = registry.loadExisting(c.id);
+    return {
+      id: c.id,
+      name: c.name,
+      cron: c.cron || null,
+      collectedAt: existing ? existing.collectedAt : null,
+      stale: registry.isStale(existing, c)
+    };
+  });
+  res.json(list);
+});
+
+app.post('/api/collect/:id', function(req, res, next) {
+  var collector = registry.discover().filter(function(c) {
+    return c.id === req.params.id;
+  })[0];
+  if (!collector) {
+    return res.status(404).json({ message: 'collector not found: ' + req.params.id });
+  }
+  registry.runCollector(collector, { force: true })
+    .then(function(result) {
+      res.json(result);
+    })
+    .catch(function(err) {
+      res.status(500).json({ message: err.message });
+    });
 });
 
 var distPath = path.join(__dirname, '..', 'client', 'dist');

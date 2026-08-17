@@ -60,13 +60,21 @@ function isCacheValid() {
   return cache.repos && Date.now() - cache.at < CACHE_TTL_MS;
 }
 
+function meta() {
+  return {
+    sourceUrl: FALLBACK.sourceUrl,
+    updatedAt: FALLBACK.updatedAt,
+    collectedAt: FALLBACK.collectedAt
+  };
+}
+
 function getRepos() {
   if (!process.env.GITHUB_TOKEN) {
-    return Promise.resolve({ categories: FALLBACK.categories, repos: FALLBACK.repos, isLive: false });
+    return Promise.resolve(Object.assign({ categories: FALLBACK.categories, repos: FALLBACK.repos, isLive: false }, meta()));
   }
 
   if (isCacheValid()) {
-    return Promise.resolve({ categories: cache.categories || FALLBACK.categories, repos: cache.repos, isLive: cache.isLive });
+    return Promise.resolve(Object.assign({ categories: cache.categories || FALLBACK.categories, repos: cache.repos, isLive: cache.isLive }, meta()));
   }
 
   return enrich(FALLBACK.repos)
@@ -77,11 +85,11 @@ function getRepos() {
         categories: FALLBACK.categories,
         isLive: true
       };
-      return { categories: FALLBACK.categories, repos: repos, isLive: true };
+      return Object.assign({ categories: FALLBACK.categories, repos: repos, isLive: true }, meta());
     })
     .catch(function(err) {
       console.error('GitHub API failed, using fallback data:', err.message);
-      return { categories: FALLBACK.categories, repos: FALLBACK.repos, isLive: false };
+      return Object.assign({ categories: FALLBACK.categories, repos: FALLBACK.repos, isLive: false }, meta());
     });
 }
 

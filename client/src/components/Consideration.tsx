@@ -119,11 +119,39 @@ function Consideration({ onNavigate }: Props) {
       <div className="cards">
         <button className="card" onClick={() => onNavigate('population')}>
           <h3>日本の総人口</h3>
-          <p>e-Stat の人口推計を折れ線グラフで表示（API 連携と静的フォールバック）。</p>
+          <p>
+            e-Stat の人口推計を折れ線グラフで表示。年範囲を選んで詳細テーブルと CSV 出力も可能。
+          </p>
         </button>
         <button className="card" onClick={() => onNavigate('repos')}>
           <h3>EBPM リポジトリ分析</h3>
-          <p>EBPM 関連 GitHub リソースをカテゴリ別に整理し、4種のグラフを都度生成。</p>
+          <p>
+            カテゴリ別・スター数・言語・更新アクティビティの4種グラフを都度生成し切り替え表示。
+          </p>
+        </button>
+        <button className="card" onClick={() => onNavigate('catalog')}>
+          <h3>リポジトリカタログ</h3>
+          <p>
+            38リポジトリを横断検索・ソート。お気に入り登録と CSV / JSON 出力。
+          </p>
+        </button>
+        <button className="card" onClick={() => onNavigate('catalog')}>
+          <h3>リポジトリ詳細</h3>
+          <p>
+            各リポジトリの説明・言語・ライセンス・スター数・GitHub リンクをモーダルで確認。
+          </p>
+        </button>
+        <button className="card" onClick={() => onNavigate('framework')}>
+          <h3>自律データ収集</h3>
+          <p>
+            e-Stat と GitHub リソースを定期収集。劣化処理とスタル検知で収集元の変化にも止まらない。
+          </p>
+        </button>
+        <button className="card" onClick={() => onNavigate('framework')}>
+          <h3>スモークテスト</h3>
+          <p>
+            保存データの整合性を CI で毎回検証。正確性至上主義を実装で体現。
+          </p>
         </button>
       </div>
     </section>

@@ -65,7 +65,8 @@ function fetchLivePopulation(appId) {
           unit: FALLBACK.unit,
           labels: years,
           data: years.map(function(y) { return yearMap[y]; }),
-          isLive: true
+          isLive: true,
+          collectedAt: new Date().toISOString()
         });
       })
       .catch(function(err) {
@@ -77,7 +78,7 @@ function fetchLivePopulation(appId) {
 function getPopulationData() {
   var snapshot = loadSnapshot();
   if (snapshot && Array.isArray(snapshot.data) && snapshot.data.length > 0) {
-    return Promise.resolve(snapshot);
+    return Promise.resolve(Object.assign({}, snapshot, { isLive: true }));
   }
 
   var appId = process.env.ESTAT_APP_ID;

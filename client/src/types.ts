@@ -4,6 +4,7 @@ export interface PopulationData {
   labels: string[]
   data: number[]
   isLive: boolean
+  collectedAt?: string
 }
 
 export interface Repo {
@@ -24,6 +25,15 @@ export interface ReposResponse {
   isLive: boolean
   sourceUrl?: string
   updatedAt?: string
+  collectedAt?: string
+}
+
+export interface CollectorInfo {
+  id: string
+  name: string
+  cron: string | null
+  collectedAt: string | null
+  stale: boolean
 }
 
 export type ChartType = 'category' | 'stars' | 'language' | 'activity'
