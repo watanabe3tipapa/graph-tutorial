@@ -44,13 +44,14 @@ EBPM は「政策をエビデンスで設計し、検証する」ことです。
 - **起動時ステイル検知**: データが古ければサーバ起動時に自動更新
 - **劣化処理**: API / ネットワーク失敗時は既存データを保持して停止しない
 - **ハイブリッドデータ源**: API ライブ取得（`ESTAT_APP_ID` / `GITHUB_TOKEN`）+ 静的フォールバック
-- **ルーズリーフ調 LP**: 手書き風罫線 + バインダーホール + 仕切りタブの6タブ構成
+- **ルーズリーフ調 LP**: 手書き風罫線 + バインダーホール + 仕切りタブの7タブ構成
 - **都度生成グラフ**: Chart.js でカテゴリ / スター数 / 言語 / 更新年別を切り替え描画
 - **WEB-UI（実用コンソール）**: カタログ検索・ソート・CSV/JSON 出力・詳細モーダル・お気に入り（localStorage）・URL ハッシュで状態共有
 - **データ鮮度バッジ**: 各データの最終更新日を表示し、古いデータには注意を喚起（GitHub Pages でも動作）
 - **コレクタ実行 WEB-UI**: 「データ収集」タブから各コレクタをワンクリック実行（サーバ起動時のみ）
 - **正確性至上主義**: `npm run smoke` によるデータ整合性スモークテストを CI で毎回実行
 - **Kitesurf 情報収集**: GitHub Pages LP + Cloudflare Worker で Kitesurf を呼び、Markdown / HTML / スクリーンショット / PDF / リンクを取得（LLM 自然言語指示にも対応）
+- **LP 内チュートリアル**: 情報収集・データ収集・使い方タブに使い方案内を内蔵
 - **モダンSPA**: Vite + React + TypeScript（npm workspaces のモノレポ）
 
 ## クイックスタート
@@ -137,12 +138,17 @@ graph-tutorial/
         ├── download.ts             # CSV / JSON エクスポート（テスト済み）
         ├── kitesurf.ts             # Worker 呼び出し（VITE_KITESURF_WORKER_URL）
         ├── repoStats.ts            # グラフ集計（純関数・テスト済み）
-        └── components/             # 考察 / データ収集 / 人口 / EBPM / カタログ / 情報収集 / 使い方
-            ├── Catalog.tsx         # 検索・ソート・出力・お気に入り
-            ├── RepoModal.tsx       # リポジトリ詳細モーダル
-            ├── FreshnessBadge.tsx  # データ鮮度バッジ
+        └── components/             # 各タブの実装
+            ├── Consideration.tsx     # 考察
+            ├── Framework.tsx         # データ収集（コレクタ実行 WEB-UI + 仕組み）
+            ├── PopulationView.tsx    # 人口グラフ（+ PopulationChart.tsx）
+            ├── ReposView.tsx         # EBPM リポジトリ（+ ReposChart.tsx）
+            ├── Catalog.tsx           # カタログ（検索・ソート・出力・お気に入り）
+            ├── RepoModal.tsx         # リポジトリ詳細モーダル
+            ├── FreshnessBadge.tsx    # データ鮮度バッジ
             ├── CollectorControls.tsx # コレクタ実行 WEB-UI
-            └── KitesurfConsole.tsx   # 情報収集指示（シンプル / LLM 自然言語）
+            ├── KitesurfConsole.tsx   # 情報収集指示（シンプル / LLM 自然言語）
+            └── Usage.tsx             # 使い方（LP タブ解説 + 開発者向け）
 ```
 
 ## API
@@ -177,8 +183,6 @@ Kitesurf（Browser Run の軽量・エージェント向けブラウザ）を利
   または **LLM 自然言語指示**（Workers AI が `{url, action}` を解析）で Kitesurf を実行
 - **Worker**: `POST /collect`（CORS 対応 / 入力検証）、Cron + KV で定期スナップショット（`GET /snapshot`）
 - **サーバー側コレクタ**: `server/collectors/kitesurf-snapshot`（`.env` の `CF_ACCOUNT_ID` / `CF_TOKEN` で有効化）
-
-詳細は Cloudflare Kitesurf 連携の節を参照。
 
 ## ドキュメント
 
