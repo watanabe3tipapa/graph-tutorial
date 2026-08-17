@@ -9,7 +9,8 @@
     "collect": "node scripts/run-collectors.js",
     "collect:list": "node scripts/run-collectors.js --list",
     "collect:repos": "node scripts/run-collectors.js --collector ebpm-repos",
-    "collect:population": "node scripts/run-collectors.js --collector estat-population"
+    "collect:population": "node scripts/run-collectors.js --collector estat-population",
+    "smoke": "node scripts/smoke-test.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

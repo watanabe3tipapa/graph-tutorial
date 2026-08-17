@@ -3,15 +3,17 @@ import Consideration from './components/Consideration'
 import Framework from './components/Framework'
 import PopulationView from './components/PopulationView'
 import ReposView from './components/ReposView'
+import Catalog from './components/Catalog'
 import Usage from './components/Usage'
 
-export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'usage'
+export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'catalog' | 'usage'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'consideration', label: '考察' },
   { id: 'framework', label: 'データ収集' },
   { id: 'population', label: '日本の人口' },
   { id: 'repos', label: 'EBPMリポジトリ' },
+  { id: 'catalog', label: 'カタログ' },
   { id: 'usage', label: '使い方' },
 ]
 
@@ -50,6 +52,7 @@ function App() {
           {tab === 'framework' && <Framework />}
           {tab === 'population' && <PopulationView />}
           {tab === 'repos' && <ReposView />}
+          {tab === 'catalog' && <Catalog />}
           {tab === 'usage' && <Usage />}
         </div>
       </main>

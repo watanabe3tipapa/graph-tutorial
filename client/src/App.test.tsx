@@ -80,4 +80,19 @@ describe('App', () => {
     expect(screen.getByLabelText('OSSツール')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByLabelText('OSSツール')).toBeChecked())
   })
+
+  it('カタログタブで EBPM カタログをページ内表示する', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('tab', { name: 'カタログ' }))
+
+    expect(await screen.findByText('EBPM リポジトリカタログ')).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'py-why/DoWhy' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'OSSツール' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('因果推論フレームワーク')).toBeInTheDocument()
+  })
 })

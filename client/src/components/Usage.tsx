@@ -50,13 +50,13 @@ npm test           # Vitest`}</pre>
       <h2>データ源</h2>
       <ul>
         <li>
-          EBPM リポジトリカタログ:
+          EBPM リポジトリカタログ（「カタログ」タブに全 38 件を表示）:
           <a
             href="https://pelican-white-paper.pages.dev/ebpm-github-resources"
             target="_blank"
             rel="noreferrer"
           >
-            EBPM 関連 GitHub リソース一覧
+            元データ: EBPM 関連 GitHub リソース一覧
           </a>
         </li>
         <li>人口データ: 政府統計総合窓口（e-Stat）／総務省統計局『人口推計』</li>

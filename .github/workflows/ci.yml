@@ -20,5 +20,7 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Smoke test (data integrity)
+        run: npm run smoke
       - name: Build
         run: npm run build

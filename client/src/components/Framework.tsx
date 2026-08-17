@@ -49,6 +49,26 @@ function Framework() {
 npm run collect:list       # 登録コレクタ一覧
 npm run collect:repos      # EBPM リポジトリのみ
 npm run collect:population # 人口データのみ`}</pre>
+
+      <h2>スモークテスト（正確性至上主義）</h2>
+      <p>
+        収集元は常に変化するため、ツールは静かに壊れ続ける。
+        本フレームワークは正しさを「守り続ける」ため、次の3層で常時検知する。
+      </p>
+      <ul>
+        <li>
+          <strong>コレクタの検証</strong>: <code>validate()</code> が取得データのスキーマ
+          （owner / name / category など）を確認し、不正なら保存しない
+        </li>
+        <li>
+          <strong>劣化処理</strong>: 取得失敗時は既存データを保持し、空のデータで上書きしない
+        </li>
+        <li>
+          <strong>継続的スモークテスト</strong>: <code>npm run smoke</code> が
+          保存済みデータの整合性を検証。CI 上でも毎回実行される
+        </li>
+      </ul>
+      <pre>{`npm run smoke     # 保存済みデータの整合性を検証（CI でも実行）`}</pre>
     </section>
   )
 }

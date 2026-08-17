@@ -279,6 +279,50 @@ code {
   border-radius: 8px;
 }
 
+/* ---- catalog ---- */
+.catalog-category {
+  margin: 24px 0;
+}
+
+.catalog-category h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0b7285;
+  border-bottom: 2px solid #0b7285;
+  padding-bottom: 4px;
+}
+
+.catalog-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.catalog-table th,
+.catalog-table td {
+  border: 1px solid #e3e6e8;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.catalog-table th {
+  background: #f3f5f6;
+  white-space: nowrap;
+}
+
+.catalog-table td.desc {
+  color: #444;
+  min-width: 240px;
+}
+
+.catalog-table td.num,
+.catalog-table th.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
 /* ---- filters ---- */
 .filters {
   display: flex;

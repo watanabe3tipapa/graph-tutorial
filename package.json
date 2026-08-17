@@ -17,7 +17,8 @@
     "collect": "npm run collect -w server",
     "collect:list": "npm run collect:list -w server",
     "collect:repos": "npm run collect:repos -w server",
-    "collect:population": "npm run collect:population -w server"
+    "collect:population": "npm run collect:population -w server",
+    "smoke": "npm run smoke -w server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
