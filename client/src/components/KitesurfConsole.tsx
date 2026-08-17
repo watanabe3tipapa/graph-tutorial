@@ -64,10 +64,13 @@ function KitesurfConsole() {
 
   if (!kitesurfEnabled()) {
     return (
-      <p className="note">
-        情報収集（Cloudflare Kitesurf）は <code>VITE_KITESURF_WORKER_URL</code> が設定されている
-        場合に利用できます。Worker をデプロイしてビルド時に指定してください。
-      </p>
+      <section className="leaf-content">
+        <h1>情報収集（Cloudflare Kitesurf）</h1>
+        <p className="note">
+          情報収集（Cloudflare Kitesurf）は <code>VITE_KITESURF_WORKER_URL</code> が設定されている
+          場合に利用できます。Worker をデプロイしてビルド時に指定してください。
+        </p>
+      </section>
     )
   }
 
@@ -92,7 +95,84 @@ function KitesurfConsole() {
   const canSubmit = running || (mode === 'llm' ? instruction.trim() === '' : url.trim() === '')
 
   return (
-    <div>
+    <section className="leaf-content">
+      <h1>情報収集（Cloudflare Kitesurf）</h1>
+      <p>
+        Cloudflare のヘッドレスブラウザ（Kitesurf）で任意の URL を開き、
+        ページ内容を <strong>Markdown / HTML / スクリーンショット / PDF / リンク一覧</strong> に
+        変換して取得します。
+      </p>
+
+      <h2>使い方（シンプルモード）</h2>
+      <ol>
+        <li>
+          「URL」に取得したいページの <code>https://…</code> を入力する
+          （未入力ならこのツールのリポジトリを取得）
+        </li>
+        <li>「アクション」で変換方法を選択する</li>
+        <li>「実行」を押して結果を確認する</li>
+      </ol>
+
+      <h2>アクションの意味</h2>
+      <table className="env-table">
+        <thead>
+          <tr>
+            <th>アクション</th>
+            <th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <code>markdown</code>
+            </td>
+            <td>ページ本文を Markdown に変換（文字情報の読み取りに最適）</td>
+          </tr>
+          <tr>
+            <td>
+              <code>content</code>
+            </td>
+            <td>HTML ソースをそのまま取得</td>
+          </tr>
+          <tr>
+            <td>
+              <code>screenshot</code>
+            </td>
+            <td>画面を PNG 画像で取得（処理が重め）</td>
+          </tr>
+          <tr>
+            <td>
+              <code>pdf</code>
+            </td>
+            <td>ページを PDF に変換（処理が重め）</td>
+          </tr>
+          <tr>
+            <td>
+              <code>links</code>
+            </td>
+            <td>ページ内のリンク一覧を抽出</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>LLM 指示モード</h2>
+      <p>
+        自然言語で指示すると、Worker 側の AI（Workers AI）が URL とアクションを自動で判断します。
+        例:
+      </p>
+      <ul>
+        <li>「graph-tutorial の README を Markdown で取得して」</li>
+        <li>「総務省統計局のサイトをスクリーンショットして」</li>
+        <li>「Wikipedia のリンク一覧を取得して」</li>
+      </ul>
+
+      <h2>注意</h2>
+      <p className="note">
+        実行はブラウザを起動するため 10〜30 秒かかります（初回はさらに遅い場合あり）。ログインが
+        必要なページや JavaScript に大きく依存するページは取得できないことがあります。LLM 指示モードは
+        指示文を Workers AI（Cloudflare のクラウド）へ送信します。
+      </p>
+
       <div className="kitesurf-mode">
         <button
           className={mode === 'simple' ? 'leaf-tab active' : 'leaf-tab'}
@@ -158,7 +238,7 @@ function KitesurfConsole() {
 
       {error ? <p className="collector-result error">失敗: {error}</p> : null}
       {response ? <ResultView response={response} /> : null}
-    </div>
+    </section>
   )
 }
 
