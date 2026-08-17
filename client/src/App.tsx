@@ -12,7 +12,7 @@ export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'cata
 const TABS: { id: Tab; label: string }[] = [
   { id: 'consideration', label: '考察' },
   { id: 'framework', label: 'データ収集' },
-  { id: 'population', label: '日本の人口' },
+  { id: 'population', label: 'よくあるやつ' },
   { id: 'repos', label: 'EBPMリポジトリ' },
   { id: 'catalog', label: 'カタログ' },
   { id: 'usage', label: '使い方' },

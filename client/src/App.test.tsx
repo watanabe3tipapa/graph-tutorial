@@ -81,7 +81,7 @@ describe('App', () => {
   it('日本の人口タブで人口データを表示する', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: '日本の人口' }))
+    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
 
     expect(await screen.findByText('日本の総人口の推移')).toBeInTheDocument()
     expect(screen.getByTestId('badge')).toHaveTextContent('静的データ')
@@ -90,7 +90,7 @@ describe('App', () => {
   it('日本の人口タブでデータ鮮度バッジを表示する', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: '日本の人口' }))
+    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
 
     expect(await screen.findByText(/データ更新: 2026-08-16/)).toBeInTheDocument()
   })
@@ -159,7 +159,7 @@ expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
   it('日本の人口タブで年範囲を選択するとテーブルが絞り込まれる', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: '日本の人口' }))
+    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
 
     const table = await screen.findByTestId('population-table')
     expect(within(table).getByText('2020')).toBeInTheDocument()
