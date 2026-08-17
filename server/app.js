@@ -73,7 +73,7 @@ app.post('/api/collect/:id', function(req, res, next) {
 
 var distPath = path.join(__dirname, '..', 'client', 'dist');
 if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath, { etag: false }));
+  app.use(express.static(distPath, { etag: false, lastModified: false }));
 }
 
 app.use(function(req, res, next) {

@@ -168,15 +168,18 @@ app.use('/api', function(req, res, next) {
   next();
 });
 
-// 静的配信（index.html 等）も ETag を無効化（express.static は独自に ETag を付与するため）
+// 静的配信（index.html 等）も ETag / Last-Modified を無効化
+// （express.static は独自に ETag と Last-Modified を付与し、If-None-Match / If-Modified-Since で 304 を返す）
 if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath, { etag: false }));
+  app.use(express.static(distPath, { etag: false, lastModified: false }));
 }
 ```
 
 > 補足: `app.disable('etag')` は Express のルートレスポンスにのみ効く。
-> `express.static`（`serve-static`）は独自の ETag 付与・`If-None-Match` 判定を行うため、
-> 静的ファイルの 304 を消すには `express.static(path, { etag: false })` の指定が別途必要。
+> `express.static`（`serve-static`）は独自の ETag **と Last-Modified** を付与し、
+> `If-None-Match` / `If-Modified-Since` それぞれで 304 を返す。消すには
+> `express.static(path, { etag: false, lastModified: false })` の両指定が必要。
+> `lastModified` を消し忘れると、`etag: false` でも `If-Modified-Since` で 304 が残る。
 
 **クライアント側**: API の `fetch` すべてに `cache: 'no-store'` を付与
 （プロキシ等の中間キャッシュでも 304 を防ぐ二重の保険）
