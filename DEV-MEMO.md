@@ -26,10 +26,11 @@ Evidence-Based Policy Making（EBPM）のための「エビデンス・パイプ
 | テスト | Vitest + Testing Library |
 | 静的解析 / 整形 | ESLint + Prettier |
 | 並列起動 | concurrently（npm workspaces） |
+| Cloudflare Workers | wrangler + workers-types（worker/ パッケージ） |
 
 ## アーキテクチャ（モノレポ）
 
-npm workspaces により `server` / `client` の 2 パッケージを管理。
+npm workspaces により `server` / `client` / `worker` の 3 パッケージを管理。
 
 ```
 graph-tutorial/
@@ -59,7 +60,7 @@ graph-tutorial/
 │   └── src/index.ts      # POST /collect（LLM 指示対応）・GET /snapshot・CORS
 └── client/               # Vite + React SPA（ルーズリーフ調 LP）
     ├── src/
-    │   ├── App.tsx                 # タブナビ（考察/データ収集/人口/EBPM/カタログ/使い方）＋URLハッシュ同期
+    │   ├── App.tsx                 # タブナビ（考察/よくあるやつ/EBPMリポジトリ/カタログ/データ収集/情報収集/使い方）＋URLハッシュ同期
     │   ├── hash.ts                 # タブ / フィルタ状態の URL 同期
     │   ├── download.ts             # CSV / JSON エクスポート（テスト済み）
     │   ├── repoStats.ts            # グラフ集計（純関数・テスト済み）
@@ -285,6 +286,7 @@ npm run collect            # 全コレクタ実行
 npm run collect:list       # 登録コレクタ一覧
 npm run collect:repos      # EBPM リポジトリのみ
 npm run collect:population # 人口データのみ
+npm run collect:kitesurf   # Kitesurf スナップショットのみ
 ```
 
 ### 開発コマンド
@@ -292,7 +294,7 @@ npm run collect:population # 人口データのみ
 ```bash
 npm run lint
 npm run format
-npm test          # Vitest（16 tests）
+npm test          # Vitest（18 tests）
 npm run smoke     # データ整合性スモークテスト
 ```
 
@@ -304,8 +306,8 @@ npm run smoke     # データ整合性スモークテスト
 
 ## 今後の拡張メモ
 
-- データ鮮度バッジ（updatedAt / collectedAt の表示と注意喚起）
-- 「データ収集」タブからのコレクタ手動実行 UI（サーバ起動時のみ）
+- ✅ データ鮮度バッジ（updatedAt / collectedAt の表示と注意喚起）
+- ✅ 「データ収集」タブからのコレクタ手動実行 UI（サーバ起動時のみ）
 - 都道府県別の人口グラフ（棒グラフ / 地図）
 - 男女別人口の折れ線グラフ
 - 統計テーマの選択 UI
@@ -313,3 +315,45 @@ npm run smoke     # データ整合性スモークテスト
 - コレクタのスケジュール設定 UI
 - GitHub Actions によるデータ更新コミット
 - API 側のテスト追加
+- Kitesurf 収集結果の差し替え UI（スナップショットの Web 編集）
+
+## 追録 2026-08-17: v0.3.0 本番デプロイと UI 整備
+
+### Cloudflare Worker を本番デプロイし、実機で検証した
+
+- **デプロイ先**: `https://graph-tutorial-kitesurf.watanabe3ti.workers.dev`
+  （`worker/` で `npx wrangler deploy`。wrangler 認証: アカウント `twpoet@nifty.com`）
+- **KV**: `wrangler kv namespace create SNAPSHOTS` → id `369ca9b7…` を `wrangler.toml` に記入
+- **Cron**: `0 */6 * * *`（6時間ごとに README スナップショットを KV へ保存）
+- **動作確認済み**: `GET /health`（kitesurf/ai/snapshot true）・`POST /collect`
+  （simple: markdown / links が実データ取得成功、LLM 指示: 「…を Markdown で取得して」→
+  `{url, action}` に自動解析）・`GET /snapshot`（KV から実 README を返却）・CORS OPTIONS
+
+### ハマりどころ（次回へのメモ）
+
+- **AI モデル**: `@cf/qwen/qwen2.5-7b-instruct` はこのアカウントに存在しない
+  （1101 / 5007 エラー）→ 利用可能な `@cf/meta/llama-3.1-8b-instruct-fp8` に変更
+  （`wrangler.toml` の `AI_MODEL`）
+- **browser バインディング**: `[[browser]]`（配列）はデプロイエラー。
+  正しくは `[browser]`（オブジェクト形式）で `binding = "BROWSER"`
+- **CORS**: `Access-Control-Allow-Origin` に許可リストをそのまま返すとブラウザが拒否する。
+  リクエストの `Origin` を検証し、許可された場合のみ**その Origin を反映**する方式に修正
+  （ワイルドカード以外は単一値でなければならない）
+- **ローカル cron 発火**: `wrangler dev --remote` の `/cdn-cgi/local/scheduled` は 404 で
+  ローカルから発火不可。定期収集はデプロイ後の Cron 登録に委ねる（KV 書き込みは手動で実証済み）
+
+### secret の設定状況
+
+- GitHub Actions secret `VITE_KITESURF_WORKER_URL` に Worker URL を設定済み
+  （Pages ビルド時に LP へ注入。`gh secret set` で実施）
+- サーバー側 `CF_ACCOUNT_ID` / `CF_TOKEN` は `.env` に未設定（`collect:kitesurf` は未検証）
+
+### LP / ドキュメントの整備
+
+- **WEB タイトル**: 「graph-tutorial - 日本の総人口」→「graph-tutorial - 可視化ツール」
+- **情報収集タブ**: URL 入力欄を可変幅（`flex: 1 1 360px`）に拡大
+- **チュートリアル内蔵**: 情報収集（アクション一覧表 / LLM 例文 / 注意点）・
+  データ収集（実行 UI の使い方）・使い方（LP のタブ + 開発者向け）タブに案内を追加
+- **README / README_EN**: 7タブ構成 / worker/ / Kitesurf 連携を反映しブラッシュアップ
+- **テスト環境**: Node 25 + jsdom で `localStorage.clear is not a function` が発生するため、
+  `client/src/test/setup.ts` に localStorage ポリフィルを追加（18 tests）
