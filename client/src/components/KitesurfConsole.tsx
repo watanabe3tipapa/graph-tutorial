@@ -110,14 +110,14 @@ function KitesurfConsole() {
 
       {mode === 'simple' ? (
         <div className="catalog-controls">
-          <div className="filter-block">
+          <div className="filter-block kitesurf-url-block">
             <span>URL</span>
             <input
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder={DEFAULT_URL}
-              className="kitesurf-input"
+              className="kitesurf-input kitesurf-url"
             />
           </div>
           <div className="filter-block">

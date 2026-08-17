@@ -616,6 +616,15 @@ code {
   min-width: 240px;
 }
 
+.catalog-controls .kitesurf-url-block {
+  flex: 1 1 360px;
+}
+
+.kitesurf-url-block .kitesurf-url {
+  width: 100%;
+  min-width: 0;
+}
+
 .kitesurf-pre {
   white-space: pre-wrap;
   word-break: break-word;
