@@ -1,0 +1,24 @@
+{
+  "name": "graph-tutorial-server",
+  "version": "0.2.0",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "start": "node bin/www",
+    "dev": "node bin/www",
+    "collect": "node scripts/run-collectors.js",
+    "collect:list": "node scripts/run-collectors.js --list",
+    "collect:repos": "node scripts/run-collectors.js --collector ebpm-repos",
+    "collect:population": "node scripts/run-collectors.js --collector estat-population"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "debug": "^4.4.0",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "helmet": "^8.0.0",
+    "http-errors": "^2.0.0",
+    "morgan": "^1.10.0",
+    "node-cron": "^4.6.0"
+  }
+}

@@ -1,0 +1,118 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ReposChart from './ReposChart'
+import { fetchRepos } from '../api'
+import type { ChartType, ReposResponse } from '../types'
+
+const CHART_TYPES: { id: ChartType; label: string }[] = [
+  { id: 'category', label: 'カテゴリ別リポジトリ数' },
+  { id: 'stars', label: 'スター数トップ10' },
+  { id: 'language', label: '言語分布' },
+  { id: 'activity', label: '更新年別アクティビティ' },
+]
+
+function ReposView() {
+  const [res, setRes] = useState<ReposResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [chartType, setChartType] = useState<ChartType>('category')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+
+  const load = useCallback(() => {
+    setError(null)
+    fetchRepos()
+      .then((r) => {
+        setRes(r)
+        setSelected(new Set(r.categories))
+      })
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : 'データの取得に失敗しました')
+      })
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const filtered = useMemo(() => {
+    if (!res) return []
+    if (selected.size === 0 || selected.size === res.categories.length) {
+      return res.repos
+    }
+    return res.repos.filter((r) => selected.has(r.category))
+  }, [res, selected])
+
+  const toggle = (cat: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(cat)) {
+        next.delete(cat)
+      } else {
+        next.add(cat)
+      }
+      return next
+    })
+  }
+
+  if (error) {
+    return <p className="error">エラー: {error}</p>
+  }
+  if (!res) {
+    return <p>読み込み中...</p>
+  }
+
+  return (
+    <section>
+      <h1>EBPM 関連 GitHub リソース分析</h1>
+      <p className="badge">
+        {res.isLive
+          ? 'GitHub API の最新値を表示中'
+          : '静的カタログを表示中（GITHUB_TOKEN を設定すると最新値を取得）'}
+      </p>
+
+      <div className="filters">
+        <div className="filter-block">
+          <h3>グラフ種類</h3>
+          <select
+            value={chartType}
+            onChange={(e) => setChartType(e.target.value as ChartType)}
+          >
+            {CHART_TYPES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-block">
+          <h3>カテゴリ（{filtered.length}件）</h3>
+          <div className="checkbox-group">
+            {res.categories.map((cat) => (
+              <label key={cat} className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={selected.has(cat)}
+                  onChange={() => toggle(cat)}
+                />
+                {cat}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <ReposChart repos={filtered} type={chartType} />
+
+      <p className="source">
+        出典:{' '}
+        {res.sourceUrl ? (
+          <a href={res.sourceUrl} target="_blank" rel="noreferrer">
+            {res.sourceUrl}
+          </a>
+        ) : (
+          'e-Stat'
+        )}
+      </p>
+    </section>
+  )
+}
+
+export default ReposView
