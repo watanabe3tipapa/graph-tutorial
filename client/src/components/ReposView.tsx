@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import ReposChart from './ReposChart'
 import { fetchRepos } from '../api'
 import type { ChartType, ReposResponse } from '../types'
+import type { Tab } from '../App'
 
 const CHART_TYPES: { id: ChartType; label: string }[] = [
   { id: 'category', label: 'カテゴリ別リポジトリ数' },
@@ -10,7 +11,7 @@ const CHART_TYPES: { id: ChartType; label: string }[] = [
   { id: 'activity', label: '更新年別アクティビティ' },
 ]
 
-function ReposView() {
+function ReposView({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const [res, setRes] = useState<ReposResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [chartType, setChartType] = useState<ChartType>('category')
@@ -103,13 +104,18 @@ function ReposView() {
 
       <p className="source">
         出典:{' '}
+        <button className="source-link" onClick={() => onNavigate('catalog')}>
+          本LP「カタログ」タブ
+        </button>
         {res.sourceUrl ? (
-          <a href={res.sourceUrl} target="_blank" rel="noreferrer">
-            {res.sourceUrl}
-          </a>
-        ) : (
-          'e-Stat'
-        )}
+          <>
+            {' '}
+            / 元データ:{' '}
+            <a href={res.sourceUrl} target="_blank" rel="noreferrer">
+              {res.sourceUrl}
+            </a>
+          </>
+        ) : null}
       </p>
     </section>
   )

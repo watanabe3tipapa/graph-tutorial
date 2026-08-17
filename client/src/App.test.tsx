@@ -85,6 +85,10 @@ describe('App', () => {
     expect(await screen.findByRole('combobox')).toBeInTheDocument()
     expect(screen.getByLabelText('OSSツール')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByLabelText('OSSツール')).toBeChecked())
+
+    expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
+    await user.click(screen.getByText('本LP「カタログ」タブ'))
+    expect(await screen.findByText('EBPM リポジトリカタログ')).toBeInTheDocument()
   })
 
   it('カタログタブで EBPM カタログをページ内表示する', async () => {

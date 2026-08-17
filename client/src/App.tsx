@@ -51,7 +51,7 @@ function App() {
           {tab === 'consideration' && <Consideration onNavigate={setTab} />}
           {tab === 'framework' && <Framework />}
           {tab === 'population' && <PopulationView />}
-          {tab === 'repos' && <ReposView />}
+          {tab === 'repos' && <ReposView onNavigate={setTab} />}
           {tab === 'catalog' && <Catalog />}
           {tab === 'usage' && <Usage />}
         </div>
