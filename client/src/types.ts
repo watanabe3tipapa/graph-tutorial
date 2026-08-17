@@ -36,4 +36,23 @@ export interface CollectorInfo {
   stale: boolean
 }
 
+export type KitesurfAction = 'markdown' | 'content' | 'screenshot' | 'pdf' | 'links'
+
+export interface KitesurfCollectRequest {
+  instruction?: string
+  url?: string
+  action?: KitesurfAction
+  waitUntil?: string
+}
+
+export interface KitesurfResponse {
+  success: boolean
+  action?: KitesurfAction
+  url?: string
+  title?: string | null
+  contentType?: string
+  result?: unknown
+  error?: string
+}
+
 export type ChartType = 'category' | 'stars' | 'language' | 'activity'

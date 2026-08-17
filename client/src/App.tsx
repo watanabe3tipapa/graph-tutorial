@@ -5,9 +5,10 @@ import PopulationView from './components/PopulationView'
 import ReposView from './components/ReposView'
 import Catalog from './components/Catalog'
 import Usage from './components/Usage'
+import KitesurfConsole from './components/KitesurfConsole'
 import { currentHashTab, setHash } from './hash'
 
-export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'catalog' | 'usage'
+export type Tab = 'consideration' | 'framework' | 'population' | 'repos' | 'catalog' | 'kitesurf' | 'usage'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'consideration', label: '考察' },
@@ -15,6 +16,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'repos', label: 'EBPMリポジトリ' },
   { id: 'catalog', label: 'カタログ' },
   { id: 'framework', label: 'データ収集' },
+  { id: 'kitesurf', label: '情報収集' },
   { id: 'usage', label: '使い方' },
 ]
 
@@ -65,6 +67,7 @@ function App() {
         <div className="leaf">
           {tab === 'consideration' && <Consideration onNavigate={setTab} />}
           {tab === 'framework' && <Framework />}
+          {tab === 'kitesurf' && <KitesurfConsole />}
           {tab === 'population' && <PopulationView />}
           {tab === 'repos' && <ReposView onNavigate={setTab} />}
           {tab === 'catalog' && <Catalog />}

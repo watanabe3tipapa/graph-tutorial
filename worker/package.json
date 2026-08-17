@@ -1,0 +1,17 @@
+{
+  "name": "graph-tutorial-worker",
+  "private": true,
+  "version": "0.3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --remote",
+    "deploy": "wrangler deploy",
+    "kv:namespace": "wrangler kv namespace create SNAPSHOTS",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250601.0",
+    "typescript": "~5.6.2",
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,6 +1,6 @@
 # graph-tutorial
 
-[![Version](https://img.shields.io/badge/version-v0.2.7-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
+[![Version](https://img.shields.io/badge/version-v0.3.0-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
 [![Issues](https://img.shields.io/github/issues/watanabe3tipapa/graph-tutorial.svg)](https://github.com/watanabe3tipapa/graph-tutorial/issues)
 
 **EBPM. Collect data relentlessly, visualize it.**

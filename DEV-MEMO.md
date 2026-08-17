@@ -9,7 +9,7 @@ Evidence-Based Policy Making（EBPM）のための「エビデンス・パイプ
 自律型コレクタで収集・更新し、ルーズリーフ・ノート調の LP で可視化する。
 
 - リポジトリ名: graph-tutorial
-- バージョン: v0.2.7
+- バージョン: v0.3.0
 - 最終更新: 2026-08-17
 
 ## 技術スタック
@@ -42,15 +42,21 @@ graph-tutorial/
 │   ├── bin/www           # サーバ起動 + コレクタ起動フック
 │   ├── collectors/       # 自律型コレクタ（1フォルダ = 1データ源）
 │   │   ├── ebpm-repos/collector.js
-│   │   └── estat-population/collector.js
+│   │   ├── estat-population/collector.js
+│   │   └── kitesurf-snapshot/collector.js   # Kitesurf で README 収集（CF_* 設定時）
 │   ├── lib/
 │   │   ├── collector-registry.js   # 自動発見 + 実行 + cron + ステイル検知
 │   │   ├── estat.js                # e-Stat 取得 + スナップショット/フォールバック
-│   │   └── github.js               # GitHub API 取得 + フォールバック
+│   │   ├── github.js               # GitHub API 取得 + フォールバック
+│   │   └── kitesurf.js             # Kitesurf REST API ラッパ（/markdown）
 │   ├── data/                       # コレクタ出力（collectedAt 付き）
 │   └── scripts/
 │       ├── run-collectors.js       # CLI
 │       └── smoke-test.js           # データ整合性スモークテスト
+├── worker/               # Cloudflare Workers（情報収集サーバー）
+│   ├── wrangler.toml     # browser / ai / kv バインディング + cron + vars
+│   ├── package.json      # wrangler / workers-types
+│   └── src/index.ts      # POST /collect（LLM 指示対応）・GET /snapshot・CORS
 └── client/               # Vite + React SPA（ルーズリーフ調 LP）
     ├── src/
     │   ├── App.tsx                 # タブナビ（考察/データ収集/人口/EBPM/カタログ/使い方）＋URLハッシュ同期
@@ -59,13 +65,16 @@ graph-tutorial/
     │   ├── repoStats.ts            # グラフ集計（純関数・テスト済み）
     │   ├── api.ts                  # API 取得 + 静的フォールバック
     │   └── components/
-    │       ├── Consideration.tsx   # EBPM ツールの考察（LP 冒頭・セルフビルドのすすめ）
-    │       ├── Framework.tsx       # データ収集フレームワーク解説
-    │       ├── Usage.tsx           # 使い方
-    │       ├── Catalog.tsx         # カタログ（検索・ソート・CSV/JSON出力・お気に入り）
-    │       ├── RepoModal.tsx       # リポジトリ詳細モーダル
-    │       ├── PopulationView.tsx / PopulationChart.tsx
-    │       └── ReposView.tsx / ReposChart.tsx
+    │   ├── Consideration.tsx   # EBPM ツールの考察（LP 冒頭・セルフビルドのすすめ）
+    │   ├── Framework.tsx       # データ収集フレームワーク解説
+    │   ├── Usage.tsx           # 使い方
+    │   ├── Catalog.tsx         # カタログ（検索・ソート・CSV/JSON出力・お気に入り）
+    │   ├── RepoModal.tsx       # リポジトリ詳細モーダル
+    │   ├── PopulationView.tsx / PopulationChart.tsx
+    │   ├── ReposView.tsx / ReposChart.tsx
+    │   ├── CollectorControls.tsx   # コレクタ実行 WEB-UI
+    │   └── KitesurfConsole.tsx     # 情報収集指示（シンプル / LLM 自然言語）
+    │   └── test/setup.ts           # jsdom 互換（localStorage ポリフィル）
 ```
 
 ## データ収集フレームワーク（自律コレクタ）
@@ -123,6 +132,32 @@ LP の「考察」タブでは、EBPM ツールのあるべき姿を6点で論�
 - **URL ハッシュ同期**: `#repos?cat=...` / `#catalog?q=...&sort=...` で状態を共有・復元
 - **データ鮮度バッジ**（`FreshnessBadge.tsx`）: `collectedAt` から「データ更新: YYYY-MM-DD」を表示。7日以上経過で「古い可能性があります」と警告（静的フォールバックにも `collectedAt` を同梱し、Pages でも動作）
 - **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「データ収集」タブでコレクタ一覧（cron / 最終更新 / ステイル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
+- **情報収集指示 UI**（`KitesurfConsole.tsx`）: 「情報収集」タブで Cloudflare Worker 経由の Kitesurf 収集を実行。シンプルモード（URL + アクション選択）と LLM モード（自然言語指示）を切り替え。`VITE_KITESURF_WORKER_URL` 未設定なら劣化表示
+
+## Cloudflare Kitesurf 連携（v0.3.0）
+
+GitHub Pages（LP・クライアント）+ Cloudflare Workers（情報収集サーバー）の構成。
+
+| 層 | 実装 | 内容 |
+|---|---|---|
+| LP（クライアント） | `client/src/kitesurf.ts` / `KitesurfConsole.tsx` | Worker へ指示 → 結果表示 |
+| Cloudflare Worker | `worker/src/index.ts` | `POST /collect`（LLM 指示は Workers AI で解析）・`GET /snapshot`（Cron + KV）・CORS |
+| Browser Run（Kitesurf） | `browser=kitesurf` Quick Action | `markdown` / `content` / `screenshot` / `pdf` / `links` |
+| サーバー側コレクタ（任意） | `server/collectors/kitesurf-snapshot` | REST + `.env` の `CF_ACCOUNT_ID` / `CF_TOKEN` で有効化 |
+
+### secret の管理
+
+- サーバー: `.env`（gitignore 済み）に `CF_ACCOUNT_ID` / `CF_TOKEN`（権限: Browser Rendering - Edit）
+- Worker: バインディング使用のため API トークン不要。機密値は `wrangler secret put`、`[vars]` は非機密設定のみ
+- GitHub Pages ビルド: `VITE_KITESURF_WORKER_URL` を GitHub Actions **secret** から注入（`.github/workflows/pages.yml`）
+
+### 前提（Cloudflare 側セットアップ）
+
+1. `wrangler kv namespace create SNAPSHOTS` → id を `worker/wrangler.toml` に記入
+2. Workers AI 有効化（`[ai]` binding、モデルは `AI_MODEL` で差し替え可）
+3. `npm run worker:deploy` → workers.dev URL を GitHub secret `VITE_KITESURF_WORKER_URL` に設定
+
+詳細は README の「Cloudflare Kitesurf 連携」を参照。
 
 ## API
 
@@ -132,6 +167,14 @@ LP の「考察」タブでは、EBPM ツールのあるべき姿を6点で論�
 | `GET /api/repos` | EBPM リポジトリカタログ（categories/repos/isLive/sourceUrl/collectedAt） |
 | `GET /api/collectors` | 登録コレクタ一覧（id/name/cron/collectedAt/stale） |
 | `POST /api/collect/:id` | コレクタを実行（ok / skipped / error を JSON で返却） |
+
+### Cloudflare Worker のエンドポイント
+
+| エンドポイント | 内容 |
+|---|---|
+| `POST /collect` | Kitesurf で情報収集（`{ url, action }` または `{ instruction }`、CORS 対応） |
+| `GET /snapshot` | Cron + KV で保存した最新スナップショット |
+| `GET /health` | 稼働確認（kitesurf / ai / snapshot の有無） |
 
 ## トラブルシューティング: API の 304（Not Modified）問題
 
@@ -208,7 +251,15 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 |------|------|
 | `ESTAT_APP_ID` | e-Stat API アプリケーションID（人口データを最新化） |
 | `GITHUB_TOKEN` | GitHub API トークン（スター数・更新日を最新化） |
+| `CF_ACCOUNT_ID` | Cloudflare アカウント ID（Kitesurf コレクタ用） |
+| `CF_TOKEN` | Cloudflare API トークン（権限: Browser Rendering - Edit） |
 | `COLLECTOR_DISABLED` | `1` で自動収集・スケジューラを無効化 |
+
+クライアントビルド時:
+
+| 変数 | 説明 |
+|------|------|
+| `VITE_KITESURF_WORKER_URL` | Cloudflare Worker の URL（未設定なら「情報収集」タブは劣化表示） |
 
 ## データ源
 
@@ -216,6 +267,7 @@ curl -s -o /dev/null -w "%{http_code}\n" \
   https://pelican-white-paper.pages.dev/ebpm-github-resources
   （8カテゴリ / 38リポジトリ。`ebpm-repos` コレクタが自動収集）
 - **人口データ**: 政府統計総合窓口（e-Stat）／総務省統計局『人口推計』
+- **graph-tutorial スナップショット**: Cloudflare Kitesurf（Browser Run `/markdown`）で収集した README
 
 ## 起動方法
 

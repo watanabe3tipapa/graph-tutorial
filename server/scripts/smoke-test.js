@@ -63,6 +63,15 @@ if (estat) {
   );
 }
 
+// ---- kitesurf-snapshot（任意: CF_ACCOUNT_ID / CF_TOKEN 設定時のみ生成される） ----
+var kitesurf = load('kitesurf-snapshot');
+if (kitesurf) {
+  check(
+    typeof kitesurf.readmeMarkdown === 'string' && kitesurf.readmeMarkdown.trim() !== '',
+    'kitesurf-snapshot: readmeMarkdown が空'
+  );
+}
+
 if (failures.length > 0) {
   console.error('smoke-test FAILED:');
   failures.forEach(function(f) {

@@ -596,6 +596,45 @@ code {
   color: #0b7285;
 }
 
+/* ---- kitesurf ---- */
+.kitesurf-mode {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.kitesurf-mode .leaf-tab {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.kitesurf-input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  min-width: 240px;
+}
+
+.kitesurf-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #f7f7f5;
+  border: 1px solid #e3e6e8;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  max-height: 480px;
+  overflow: auto;
+}
+
+.kitesurf-screenshot {
+  max-width: 100%;
+  border: 1px solid #e3e6e8;
+  border-radius: 10px;
+}
+
 /* ---- catalog ---- */
 .catalog-category {
   margin: 24px 0;
