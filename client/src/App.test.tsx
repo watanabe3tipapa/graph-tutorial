@@ -63,64 +63,68 @@ describe('App', () => {
     localStorage.clear()
   })
 
-  it('LP の考察タブに EBPM ツールの考察が表示される', () => {
+  it('ホームタブにヒーローと3つのCTAが表示される', () => {
     render(<App />)
     expect(
-      screen.getByRole('heading', {
-        name: '考察: EBPM に関連するツールとは、どのようなものを構築すればよいのか',
-      }),
+      screen.getByRole('heading', { name: 'EBPMのためのデータ探索・可視化スターター' }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: '提唱: セルフビルドのすすめ' }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(/第三者に委ねるべきではない/),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '人口推移をみる' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'EBPM OSSを探す' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'ローカルで動かす' })).toBeInTheDocument()
   })
 
-  it('日本の人口タブで人口データを表示する', async () => {
+  it('データ品質・仕組みタブに設計思想が表示される', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
+    await user.click(screen.getByRole('tab', { name: 'データ品質・仕組み' }))
+    expect(
+      screen.getByRole('heading', { name: '継続運用できる内製能力を残す' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '正確性至上主義' })).toBeInTheDocument()
+  })
+
+  it('日本の人口（デモ）タブで人口データを表示する', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('tab', { name: 'デモ' }))
 
     expect(await screen.findByText('日本の総人口の推移')).toBeInTheDocument()
     expect(screen.getByTestId('badge')).toHaveTextContent('静的データ')
   })
 
-  it('日本の人口タブでデータ鮮度バッジを表示する', async () => {
+  it('日本の人口（デモ）タブでデータ鮮度バッジを表示する', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
+    await user.click(screen.getByRole('tab', { name: 'デモ' }))
 
     expect(await screen.findByText(/データ更新: 2026-08-16/)).toBeInTheDocument()
   })
 
-  it('データ収集タブでコレクタ実行 UI がサーバ未接続時に劣化表示される', async () => {
+  it('導入するタブでコレクタ実行 UI がサーバ未接続時に劣化表示される', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'データ収集' }))
+    await user.click(screen.getByRole('tab', { name: '導入する' }))
 
     expect(await screen.findByText(/サーバ起動時のみ利用できます/)).toBeInTheDocument()
   })
 
-  it('EBPMリポジトリタブでカテゴリフィルタを表示する', async () => {
+  it('EBPMカタログタブで探索と概観を切り替えられる', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'EBPMリポジトリ' }))
+    await user.click(screen.getByRole('tab', { name: 'EBPMカタログ' }))
+    await screen.findByRole('link', { name: 'py-why/DoWhy' })
 
-    expect(await screen.findByRole('combobox')).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: '概観（グラフ）' }))
+    expect(await screen.findByTestId('chart-bar')).toBeInTheDocument()
     expect(screen.getByLabelText('OSSツール')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('OSSツール'))
     await waitFor(() => expect(screen.getByLabelText('OSSツール')).toBeChecked())
-
-expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
-    await user.click(screen.getByText('本LP「カタログ」タブ'))
-    expect(await screen.findByText('EBPM リポジトリカタログ')).toBeInTheDocument()
   })
 
   it('カタログタブの検索でリポジトリを絞り込む', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'カタログ' }))
+    await user.click(screen.getByRole('tab', { name: 'EBPMカタログ' }))
 
     await user.type(await screen.findByLabelText('カタログ検索'), 'delphi')
 
@@ -131,7 +135,7 @@ expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
   it('カタログタブでお気に入りを登録し「お気に入りのみ」で絞り込む', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'カタログ' }))
+    await user.click(screen.getByRole('tab', { name: 'EBPMカタログ' }))
     await screen.findByRole('link', { name: 'py-why/DoWhy' })
 
     await user.click(screen.getByLabelText('お気に入り py-why/DoWhy'))
@@ -145,7 +149,7 @@ expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
   it('カタログタブで詳細モーダルを開閉できる', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'カタログ' }))
+    await user.click(screen.getByRole('tab', { name: 'EBPMカタログ' }))
     await screen.findByRole('link', { name: 'py-why/DoWhy' })
 
     await user.click(screen.getByLabelText('詳細 py-why/DoWhy'))
@@ -159,7 +163,7 @@ expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
   it('日本の人口タブで年範囲を選択するとテーブルが絞り込まれる', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: 'よくあるやつ' }))
+    await user.click(screen.getByRole('tab', { name: 'デモ' }))
 
     const table = await screen.findByTestId('population-table')
     expect(within(table).getByText('2020')).toBeInTheDocument()
@@ -178,12 +182,27 @@ expect(screen.getByText('本LP「カタログ」タブ')).toBeInTheDocument()
     expect(await screen.findByText('日本の総人口の推移')).toBeInTheDocument()
   })
 
-  it('URL ハッシュ #repos?cat=... でカテゴリ選択が復元される', async () => {
-    history.replaceState(null, '', '#repos?cat=OSSツール')
+  it('URL ハッシュ #catalog?q=... で検索状態が復元される', async () => {
+    history.replaceState(null, '', '#catalog?q=delphi')
     render(<App />)
+    expect(await screen.findByRole('link', { name: 'cmu-delphi/delphi-epidata' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'py-why/DoWhy' })).not.toBeInTheDocument()
+  })
 
-    expect(await screen.findByRole('combobox')).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByLabelText('OSSツール')).toBeChecked())
-    expect(screen.getByLabelText('データセット')).not.toBeChecked()
+  it('タブを矢印キーで移動できる', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    const homeTab = screen.getByRole('tab', { name: 'ホーム' })
+    homeTab.focus()
+    await user.keyboard('{ArrowRight}')
+    expect(screen.getByRole('heading', { name: '日本の総人口の推移' })).toBeInTheDocument()
+    await user.keyboard('{ArrowRight}')
+    expect(screen.getByRole('heading', { name: 'EBPM リポジトリカタログ' })).toBeInTheDocument()
+    await user.keyboard('{ArrowLeft}')
+    expect(screen.getByRole('heading', { name: '日本の総人口の推移' })).toBeInTheDocument()
+    await user.keyboard('{Home}')
+    expect(
+      screen.getByRole('heading', { name: 'EBPMのためのデータ探索・可視化スターター' }),
+    ).toBeInTheDocument()
   })
 })

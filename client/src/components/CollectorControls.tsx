@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { CollectorInfo } from '../types'
+import type { AuditEntry, CollectorInfo } from '../types'
 
 interface RunResult {
   id: string
@@ -16,11 +16,18 @@ function formatDate(iso: string | null): string {
   return isNaN(d.getTime()) ? '-' : d.toISOString().slice(0, 10)
 }
 
+function formatTime(iso: string): string {
+  const d = new Date(iso)
+  return isNaN(d.getTime()) ? '-' : d.toISOString().slice(0, 19).replace('T', ' ')
+}
+
 function CollectorControls() {
   const [collectors, setCollectors] = useState<CollectorInfo[] | null>(null)
   const [unavailable, setUnavailable] = useState(false)
   const [running, setRunning] = useState<string | null>(null)
   const [results, setResults] = useState<Record<string, RunResult>>({})
+  const [audit, setAudit] = useState<AuditEntry[] | null>(null)
+  const [auditUnavailable, setAuditUnavailable] = useState(false)
 
   const load = useCallback(() => {
     fetch('/api/collectors', { cache: 'no-store' })
@@ -32,9 +39,20 @@ function CollectorControls() {
       .catch(() => setUnavailable(true))
   }, [])
 
+  const loadAudit = useCallback(() => {
+    fetch('/api/audit?limit=10', { cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        return res.json()
+      })
+      .then((data: { entries: AuditEntry[] }) => setAudit(data.entries))
+      .catch(() => setAuditUnavailable(true))
+  }, [])
+
   useEffect(() => {
     load()
-  }, [load])
+    loadAudit()
+  }, [load, loadAudit])
 
   const run = (c: CollectorInfo) => {
     setRunning(c.id)
@@ -50,6 +68,7 @@ function CollectorControls() {
       .then((data) => {
         setResults((prev) => ({ ...prev, [c.id]: data }))
         load()
+        loadAudit()
       })
       .catch((e: unknown) => {
         setResults((prev) => ({
@@ -109,6 +128,50 @@ function CollectorControls() {
           </div>
         )
       })}
+      {auditUnavailable ? null : audit === null ? null : (
+        <section className="audit-section" aria-label="収集の実行履歴">
+          <h3>実行履歴（監査ログ）</h3>
+          {audit.length === 0 ? (
+            <p className="note">まだ実行履歴がありません。</p>
+          ) : (
+            <div className="table-scroll" role="region" aria-label="実行履歴一覧">
+              {/* スクロール可能領域はキーボードでフォーカス可能にする（WAI-ARIA 推奨） */}
+              {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+              <div tabIndex={0}>
+                <table className="audit-table">
+                <thead>
+                  <tr>
+                    <th scope="col">日時</th>
+                    <th scope="col">コレクタ</th>
+                    <th scope="col">起点</th>
+                    <th scope="col">結果</th>
+                    <th scope="col">所要時間</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {audit.map((a, i) => (
+                    <tr key={a.ts + ':' + i}>
+                      <td>{formatTime(a.ts)}</td>
+                      <td>
+                        <code>{a.collector}</code>
+                      </td>
+                      <td>{a.source}</td>
+                      <td>
+                        <span className={'collector-result ' + a.status}>
+                          {a.status}
+                          {a.status === 'error' ? `: ${a.error ?? ''}` : ''}
+                        </span>
+                      </td>
+                      <td>{a.durationMs}ms</td>
+                    </tr>
+                  ))}
+                </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   )
 }

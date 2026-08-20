@@ -1,6 +1,6 @@
 {
   "name": "graph-tutorial",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "license": "GPL-2.0",
   "description": "EBPM 関連 OSS と日本の総人口データを可視化するエビデンス・パイプラインのチュートリアル",
@@ -15,7 +15,7 @@
     "start": "node server/bin/www",
     "lint": "npm run lint -w client",
     "format": "npm run format -w client",
-    "test": "npm run test -w client",
+    "test": "npm run test -w client && npm run test -w server",
     "collect": "npm run collect -w server",
     "collect:list": "npm run collect:list -w server",
     "collect:repos": "npm run collect:repos -w server",

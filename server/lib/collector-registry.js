@@ -1,11 +1,44 @@
 var fs = require('fs');
 var path = require('path');
 var cron = require('node-cron');
+var Ajv = require('ajv');
+var audit = require('./audit');
+var notify = require('./notify');
 
 var COLLECTORS_DIR = path.join(__dirname, '..', 'collectors');
 var DATA_DIR = path.join(__dirname, '..', 'data');
 
 var DEFAULT_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
+
+var ajv = new Ajv({ allErrors: true });
+var schemaCache = {};
+
+// コレクタ定義の JSON Schema（optional）があれば構造検証する
+function validateSchema(collector, data) {
+  if (!collector.schema) {
+    return;
+  }
+  if (!schemaCache[collector.id]) {
+    schemaCache[collector.id] = ajv.compile(collector.schema);
+  }
+  if (!schemaCache[collector.id](data)) {
+    throw new Error(
+      'スキーマ検証に失敗: ' + ajv.errorsText(schemaCache[collector.id].errors)
+    );
+  }
+}
+
+function recordAudit(collector, options, result, startedAt) {
+  audit.appendAudit({
+    ts: new Date().toISOString(),
+    collector: collector.id,
+    source: options.source || 'unknown',
+    status: result.status,
+    error: result.error || null,
+    keptExisting: result.keptExisting || null,
+    durationMs: Math.round(Date.now() - startedAt)
+  });
+}
 
 function discover() {
   if (!fs.existsSync(COLLECTORS_DIR)) {
@@ -63,6 +96,7 @@ function writeOutput(collector, data) {
 function runCollector(collector, opts) {
   var options = opts || {};
   var existing = loadExisting(collector.id);
+  var startedAt = Date.now();
 
   return Promise.resolve()
     .then(function() {
@@ -70,44 +104,60 @@ function runCollector(collector, opts) {
     })
     .then(function(data) {
       if (data && data.skipped) {
-        return { id: collector.id, status: 'skipped', reason: data.reason || 'skip 指示' };
+        var skipped = {
+          id: collector.id,
+          name: collector.name,
+          status: 'skipped',
+          reason: data.reason || 'skip 指示'
+        };
+        recordAudit(collector, options, skipped, startedAt);
+        return skipped;
       }
+      validateSchema(collector, data);
       if (collector.validate) {
         collector.validate(data);
       }
       writeOutput(collector, data);
-      return {
+      var ok = {
         id: collector.id,
         name: collector.name,
         status: 'ok',
         collectedAt: new Date().toISOString()
       };
+      recordAudit(collector, options, ok, startedAt);
+      return ok;
     })
     .catch(function(err) {
       if (options.force) {
+        recordAudit(collector, options, { id: collector.id, status: 'error', error: err.message }, startedAt);
+        notify.notifyFailure({ collector: collector, error: err, existing: existing });
         throw err;
       }
       console.error(
         '[collector:' + collector.id + '] 収集失敗。既存データを保持します:',
         err.message
       );
-      return {
+      var kept = {
         id: collector.id,
         name: collector.name,
         status: 'error',
         error: err.message,
         keptExisting: !!existing
       };
+      recordAudit(collector, options, kept, startedAt);
+      notify.notifyFailure({ collector: collector, error: err, existing: existing });
+      return kept;
     });
 }
 
-function runAll(filterIds) {
+function runAll(filterIds, opts) {
+  var options = opts || {};
   var collectors = discover();
   var targets = collectors.filter(function(c) {
     return !filterIds || filterIds.indexOf(c.id) !== -1;
   });
   return Promise.all(targets.map(function(c) {
-    return runCollector(c, {});
+    return runCollector(c, { source: options.source || 'cli' });
   }));
 }
 
@@ -116,7 +166,7 @@ function refreshStale() {
   var tasks = collectors.map(function(c) {
     if (isStale(loadExisting(c.id), c)) {
       console.log('[collector:' + c.id + '] データが古いため自動更新します');
-      return runCollector(c, {});
+      return runCollector(c, { source: 'startup' });
     }
     return Promise.resolve({ id: c.id, name: c.name, status: 'ok', reason: 'fresh' });
   });
@@ -135,7 +185,7 @@ function startScheduler() {
       return;
     }
     cron.schedule(c.cron, function() {
-      runCollector(c, {}).then(function(result) {
+      runCollector(c, { source: 'scheduler' }).then(function(result) {
         console.log('[scheduler] ' + JSON.stringify(result));
       });
     });

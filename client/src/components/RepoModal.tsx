@@ -32,8 +32,15 @@ function RepoModal({ repo, isFavorite, onToggleFavorite, onClose }: Props) {
   ]
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={repo.owner + '/' + repo.name} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-root">
+      <button
+        type="button"
+        className="modal-overlay"
+        aria-label="ダイアログを閉じる"
+        tabIndex={-1}
+        onClick={onClose}
+      />
+      <div className="modal" role="dialog" aria-modal="true" aria-label={repo.owner + '/' + repo.name}>
         <div className="modal-head">
           <h2>
             {repo.owner}/{repo.name}

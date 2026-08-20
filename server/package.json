@@ -1,6 +1,6 @@
 {
   "name": "graph-tutorial-server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "license": "GPL-2.0",
   "main": "app.js",
@@ -12,9 +12,12 @@
     "collect:repos": "node scripts/run-collectors.js --collector ebpm-repos",
     "collect:population": "node scripts/run-collectors.js --collector estat-population",
     "collect:kitesurf": "node scripts/run-collectors.js --collector kitesurf-snapshot",
-    "smoke": "node scripts/smoke-test.js"
+    "smoke": "node scripts/smoke-test.js",
+    "test": "node --test"
   },
   "dependencies": {
+    "ajv": "^6.15.0",
+    "cheerio": "^1.2.0",
     "cookie-parser": "^1.4.7",
     "debug": "^4.4.0",
     "dotenv": "^16.4.7",

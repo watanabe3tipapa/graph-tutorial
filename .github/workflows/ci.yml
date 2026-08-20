@@ -20,6 +20,10 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Test (worker security unit tests)
+        run: npm run test -w worker
+      - name: Typecheck (worker)
+        run: npm run typecheck -w worker
       - name: Smoke test (data integrity)
         run: npm run smoke
       - name: Build

@@ -1,7 +1,7 @@
 {
   "name": "graph-tutorial-client",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "GPL-2.0",
   "type": "module",
   "scripts": {
@@ -27,6 +27,7 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^9.18.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",

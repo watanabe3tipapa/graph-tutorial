@@ -1,3 +1,5 @@
+import { isSafeTarget } from './url-security'
+
 export interface Env {
   BROWSER: {
     quickAction: (action: string, options: Record<string, unknown>) => Promise<Response>
@@ -8,10 +10,15 @@ export interface Env {
   SNAPSHOTS?: KVNamespace
   ALLOWED_ORIGIN?: string
   AI_MODEL?: string
+  ALLOWED_URL_PREFIXES?: string
+  COLLECT_RATE_LIMIT?: string
+  COLLECTOR_TOKEN?: string
+  REDIRECT_CHECK?: string
 }
 
 const DEFAULT_REPO_URL = 'https://github.com/watanabe3tipapa/graph-tutorial'
 const DEFAULT_AI_MODEL = '@cf/qwen/qwen2.5-7b-instruct'
+const DEFAULT_ALLOWED_PREFIXES = ['https://github.com/watanabe3tipapa/graph-tutorial']
 
 const ACTIONS = ['markdown', 'content', 'screenshot', 'pdf', 'links'] as const
 type Action = (typeof ACTIONS)[number]
@@ -36,6 +43,27 @@ function allowedOrigins(env: Env): string[] {
     .filter(Boolean)
 }
 
+function allowedUrlPrefixes(env: Env): string[] {
+  return (env.ALLOWED_URL_PREFIXES || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
+// 定数時間比較（Node の crypto は Worker 環境では使わない）
+function safeEqual(a: string, b: string): boolean {
+  const ba = new TextEncoder().encode(a)
+  const bb = new TextEncoder().encode(b)
+  if (ba.length !== bb.length) {
+    return false
+  }
+  let diff = 0
+  for (let i = 0; i < ba.length; i++) {
+    diff |= ba[i] ^ bb[i]
+  }
+  return diff === 0
+}
+
 function corsHeaders(env: Env, origin: string | null): Headers {
   const allowed = allowedOrigins(env)
   const allowAll = allowed.includes('*')
@@ -46,7 +74,7 @@ function corsHeaders(env: Env, origin: string | null): Headers {
     h.set('Access-Control-Allow-Origin', value)
   }
   h.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  h.set('Access-Control-Allow-Headers', 'Content-Type')
+  h.set('Access-Control-Allow-Headers', 'Content-Type, x-collector-token')
   h.set('Access-Control-Max-Age', '86400')
   return h
 }
@@ -207,6 +235,35 @@ async function runAction(
   return { result: text }
 }
 
+// REDIRECT_CHECK=1 時のみ有効。リダイレクトを追って最終 URL が許可リストと安全性を
+// 満たすか検証する（DNS rebinding・許可外ホストへの誘導対策）。
+async function redirectTargetOk(
+  env: Env,
+  url: string,
+  allowList: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  if (env.REDIRECT_CHECK !== '1') {
+    return { ok: true }
+  }
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { Range: 'bytes=0-0', 'User-Agent': 'graph-tutorial-worker' },
+    })
+    const finalUrl = res.url || url
+    if (!isSafeTarget(finalUrl)) {
+      return { ok: false, error: 'リダイレクト先が許可されないホストです（プライベート IP・メタデータ等）' }
+    }
+    if (!allowList.some((p) => finalUrl.startsWith(p))) {
+      return { ok: false, error: 'リダイレクト先が許可リスト（ALLOWED_URL_PREFIXES）に含まれていません' }
+    }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'リダイレクト検証に失敗しました' }
+  }
+}
+
 async function handleCollect(env: Env, body: unknown, origin: string | null): Promise<Response> {
   const req = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>
   const instruction = typeof req.instruction === 'string' ? req.instruction.trim() : ''
@@ -221,6 +278,18 @@ async function handleCollect(env: Env, body: unknown, origin: string | null): Pr
         corsHeaders(env, origin)
       )
     }
+    // LLM モードは指示文と URL が Workers AI へ送信されるため、明示的な同意を要求
+    if (req.consent !== true) {
+      return json(
+        {
+          success: false,
+          error:
+            'LLM モードでは consent: true が必要です。指示文と取得対象 URL が Workers AI に送信されます。個人情報・機密情報は送信しないでください。',
+        },
+        400,
+        corsHeaders(env, origin)
+      )
+    }
     const parsed = await extractWithAI(env, instruction)
     url = parsed.url
     action = parsed.action
@@ -228,6 +297,32 @@ async function handleCollect(env: Env, body: unknown, origin: string | null): Pr
 
   if (!url || !isValidUrl(url)) {
     return json({ success: false, error: 'url は https:// で始まる必要があります' }, 400, corsHeaders(env, origin))
+  }
+
+  // SSRF 対策: プライベート IP・メタデータ・特殊用途ホストを遮断
+  if (!isSafeTarget(url)) {
+    return json(
+      { success: false, error: '収集対象として許可されないホストです（プライベート IP・メタデータ等）' },
+      403,
+      corsHeaders(env, origin)
+    )
+  }
+
+  // 宛先許可リスト（明示的に設定されていなければ自プロジェクトのみ許可 = fail closed）
+  const prefixes = allowedUrlPrefixes(env)
+  const allowList = prefixes.length > 0 ? prefixes : DEFAULT_ALLOWED_PREFIXES
+  if (!allowList.some((p) => url && url.startsWith(p))) {
+    return json(
+      { success: false, error: '指定された URL は許可リスト（ALLOWED_URL_PREFIXES）に含まれていません' },
+      403,
+      corsHeaders(env, origin)
+    )
+  }
+
+  // リダイレクト先も許可リストと安全性を満たすことを検証（REDIRECT_CHECK=1 で有効化）
+  const redirect = await redirectTargetOk(env, url, allowList)
+  if (!redirect.ok) {
+    return json({ success: false, error: redirect.error }, 403, corsHeaders(env, origin))
   }
 
   const waitUntil = typeof req.waitUntil === 'string' ? req.waitUntil : undefined
@@ -268,8 +363,26 @@ async function handleSnapshot(env: Env, origin: string | null): Promise<Response
   return json({ success: true, ...(snapshot as Record<string, unknown>) }, 200, corsHeaders(env, origin))
 }
 
-async function handleCron(env: Env): Promise<void> {
-  const out = await runAction(env, 'markdown', DEFAULT_REPO_URL, 'networkidle2')
+// 呼出元 IP ごとの時間あたり利用量制限（KV カウンタ + TTL）
+async function checkRateLimit(request: Request, env: Env): Promise<boolean> {
+  if (!env.SNAPSHOTS) {
+    return false
+  }
+  const ip =
+    request.headers.get('CF-Connecting-IP') ||
+    request.headers.get('x-forwarded-for') ||
+    'unknown'
+  const limit = parseInt(env.COLLECT_RATE_LIMIT || '30', 10) || 30
+  const key = 'rate:' + ip + ':' + new Date().toISOString().slice(0, 13)
+  const current = parseInt((await env.SNAPSHOTS.get(key)) || '0', 10) || 0
+  if (current >= limit) {
+    return true
+  }
+  await env.SNAPSHOTS.put(key, String(current + 1), { expirationTtl: 3600 })
+  return false
+}
+
+async function handleCron(env: Env): Promise<void> {  const out = await runAction(env, 'markdown', DEFAULT_REPO_URL, 'networkidle2')
   const snapshot = {
     collectedAt: new Date().toISOString(),
     url: DEFAULT_REPO_URL,
@@ -304,6 +417,25 @@ export default {
     }
 
     if (url.pathname === '/collect' && request.method === 'POST') {
+      // 認証（fail closed）: COLLECTOR_TOKEN が未設定なら収集自体を無効化
+      if (!env.COLLECTOR_TOKEN) {
+        return json(
+          { success: false, error: 'COLLECTOR_TOKEN が未設定のため収集は無効です' },
+          503,
+          corsHeaders(env, origin)
+        )
+      }
+      const supplied = request.headers.get('x-collector-token')
+      if (!supplied || !safeEqual(supplied, env.COLLECTOR_TOKEN)) {
+        return json({ success: false, error: 'x-collector-token が不正です' }, 401, corsHeaders(env, origin))
+      }
+      if (await checkRateLimit(request, env)) {
+        return json(
+          { success: false, error: '利用量制限を超えました（時間あたりの上限）' },
+          429,
+          corsHeaders(env, origin)
+        )
+      }
       let body: unknown
       try {
         body = await request.json()

@@ -19,3 +19,13 @@ crons = ["0 */6 * * *"]
 [vars]
 ALLOWED_ORIGIN = "https://watanabe3tipapa.github.io,http://localhost:5173"
 AI_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8"
+# POST /collect の宛先許可リスト（明示しない場合は自プロジェクトのみ許可）
+ALLOWED_URL_PREFIXES = "https://github.com/watanabe3tipapa/graph-tutorial"
+# 呼出元 IP ごとの時間あたり収集回数上限
+COLLECT_RATE_LIMIT = "30"
+# リダイレクト先も許可リスト・安全性を満たすことを検証する（"1" で有効化。追加 1 リクエスト分の負荷）
+REDIRECT_CHECK = "0"
+
+# 注意: COLLECTOR_TOKEN は [vars] に書かず、以下で設定する（機密値）
+#   npx wrangler secret put COLLECTOR_TOKEN
+# 未設定の間は POST /collect は 503 を返し、収集は無効（fail closed）

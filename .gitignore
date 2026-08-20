@@ -6,3 +6,5 @@ node_modules/
 *.tsbuildinfo
 client/dist/
 worker/.wrangler/
+server/data/audit.jsonl
+server/data/.notify-state.json

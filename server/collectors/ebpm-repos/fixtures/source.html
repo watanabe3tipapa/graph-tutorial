@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>EBPM 関連 GitHub リソース一覧</title>
+                        <link rel="stylesheet" href="https://pelican-white-paper.pages.dev/theme/css/main.css" />
+                                <link href="https://pelican-white-paper.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Pelican White Paper Atom Feed" />
+    <meta name="description" content="EBPM 関連 GitHub リソース一覧 最終更新: 2026年8月16日 Evidence-Based Policy Making（EBPM）に関連するGitHub上のOSSツール、データセット、手法ライブラリ、知見集約リポジトリなどを …" />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://pelican-white-paper.pages.dev/">Pelican White Paper</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="https://pelican-white-paper.pages.dev/category/ebpm.html">EBPM</a></li>
+                                                <li><a href="https://pelican-white-paper.pages.dev/category/markdown.html">Markdown</a></li>
+                                                <li><a href="https://pelican-white-paper.pages.dev/category/restructuredtext.html">reStructuredText</a></li>
+                                                <li><a href="https://pelican-white-paper.pages.dev/category/tekunorozi-.html">テクノロジー</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://pelican-white-paper.pages.dev/ebpm-github-resources.html" rel="bookmark"
+             title="Permalink to EBPM 関連 GitHub リソース一覧">EBPM 関連 GitHub リソース一覧</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-08-16T00:00:00+09:00">
+                Published: Sun 16 August 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://pelican-white-paper.pages.dev/author/watanabe3tipapa.html">watanabe3tipapa</a>
+                </address>
+        <p>In <a href="https://pelican-white-paper.pages.dev/category/ebpm.html">EBPM</a>.</p>
+        
+</footer><!-- /.post-info -->        <h1>EBPM 関連 GitHub リソース一覧</h1>
+<blockquote>
+<p>最終更新: 2026年8月16日<br>
+Evidence-Based Policy Making（EBPM）に関連するGitHub上のOSSツール、データセット、手法ライブラリ、知見集約リポジトリなどをカテゴリ別に整理しました。</p>
+</blockquote>
+<hr>
+<h2>1. 因果推論ライブラリ（総合）</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/py-why/dowhy">py-why/dowhy</a></td>
+<td>Microsoft主導。因果グラフとポテンシャルアウトカムを統合した因果推論フレームワーク。仮説の明示的モデリングと検証をサポート。</td>
+<td>8,237</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/py-why/EconML">py-why/EconML</a></td>
+<td>Microsoft Research。MLと計量経済学を融合した因果推論ツールキット。Double Machine Learningなどの手法を実装。</td>
+<td>-</td>
+<td>Python</td>
+<td>MIT相当</td>
+</tr>
+<tr>
+<td><a href="https://github.com/uber/causalml">uber/causalml</a></td>
+<td>Uber。アップリフトモデリングと因果推断のMLアルゴリズム群。政策効果の異質性分析に有用。</td>
+<td>5,938</td>
+<td>Python</td>
+<td>BSD系</td>
+</tr>
+<tr>
+<td><a href="https://github.com/pymc-labs/CausalPy">pymc-labs/CausalPy</a></td>
+<td>準実験的な設定での因果推論をベイズアプローチ（PyMC）で実現。DID・回帰不連続・合成制御などに対応。</td>
+<td>1,135</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/biomedsciai/causallib">BiomedSciAI/causallib</a></td>
+<td>IBM Research。モジュール型の因果推論分析・モデル評価パッケージ。IPW・標準化・T-learnerなど。</td>
+<td>812</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/jakobrunge/tigramite">jakobrunge/tigramite</a></td>
+<td>時系列データに特化した因果推論パッケージ。PCMCIなどの手法を実装。パネルデータの因果探索に有用。</td>
+<td>1,679</td>
+<td>Python</td>
+<td>GPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/google/tfp-causalimpact">google/tfp-causalimpact</a></td>
+<td>Google。TensorFlow ProbabilityベースのCausalImpact実装。時系列の介入効果推定。</td>
+<td>158</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/amazon-science/azcausal">amazon-science/azcausal</a></td>
+<td>Amazon Science。DID・Synthetic DID・Panelデータ分析の統合フレームワーク。</td>
+<td>46</td>
+<td>Python/R</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Sanofi-Public/CImpact">Sanofi-Public/CImpact</a></td>
+<td>時系列分析向け因果推論ライブラリ。</td>
+<td>44</td>
+<td>Python</td>
+<td>独自</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>2. 差分の差分法（DiD）・合成制御法（SCM）関連</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/synth-inference/synthdid">synth-inference/synthdid</a></td>
+<td>Synthetic Difference-in-Differencesの標準的なR実装。Arkhangelsky et al. (2021)。</td>
+<td>312</td>
+<td>R</td>
+<td>BSD-3</td>
+</tr>
+<tr>
+<td><a href="https://github.com/igerber/diff-diff">igerber/diff-diff</a></td>
+<td>PythonでのDID総合パッケージ。Callaway-Sant'Anna・Synthetic DiD・HonestDiD・event studyをsklearn風APIで提供。</td>
+<td>274</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bernardodionisi/differences">bernardodionisi/differences</a></td>
+<td>PythonでのDID実装。パネルデータの因果推論に特化。</td>
+<td>114</td>
+<td>Python</td>
+<td>GPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Daniel-Pailanir/sdid">Daniel-Pailanir/sdid</a></td>
+<td>Synthetic Difference-in-DifferencesのStata実装。</td>
+<td>97</td>
+<td>Stata</td>
+<td>GPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/yo5uke/coresynth">yo5uke/coresynth</a></td>
+<td>Rでの高速・統一型合成制御法パッケージ。SCM・SDID・GSC・MCなどを一つのformulaインターフェースで。</td>
+<td>4</td>
+<td>R/C++</td>
+<td>独自</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dropout009/sdid_python">dropout009/sdid_python</a></td>
+<td>Synthetic DiDのPython実装（Jupyter Notebook形式）。</td>
+<td>17</td>
+<td>Python</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>3. 政策学習・政策評価ツール</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/grf-labs/policytree">grf-labs/policytree</a></td>
+<td>二重頑健的経験的厚生最大化に基づく政策学習（ツリー構造）。</td>
+<td>87</td>
+<td>R/C++</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/oguerrer/ppi">oguerrer/ppi</a></td>
+<td>Policy Priority Inferenceモデル。エージェントベースシミュレーションでSDGs達成の政策優先度を推定。</td>
+<td>13</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/KDiazOrdaz/Machine-learning-in-policy-evaluation-new-tools-for-causal-inference">KDiazOrdaz/Machine-learning-in-policy-evaluation-new-tools-for-causal-inference</a></td>
+<td>政策評価へのML適用に関する論文付属コード。</td>
+<td>12</td>
+<td>R</td>
+<td>BSD-2</td>
+</tr>
+<tr>
+<td><a href="https://github.com/CausalML/confounding-robust-policy-improvement">CausalML/confounding-robust-policy-improvement</a></td>
+<td>観測されていない交絡下でのミニマックス政策学習。</td>
+<td>4</td>
+<td>Python</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/human-technology-institute/bayesian-causal-policy">human-technology-institute/bayesian-causal-policy</a></td>
+<td>政策意思決定のためのベイズ因果探索。</td>
+<td>1</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/human-technology-institute/BAT-for-social-policy">human-technology-institute/BAT-for-social-policy</a></td>
+<td>社会政策のためのベイズ適応型試行（Bayesian Adaptive Trials）のシミュレーションコード。</td>
+<td>-</td>
+<td>Python</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>4. 政策シミュレーション・制度モデリング</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/openfisca/openfisca-core">openfisca/openfisca-core</a></td>
+<td>税制・社会保障制度のマイクロシミュレーションエンジン。"Legislation as Code"を実現。</td>
+<td>234</td>
+<td>Python</td>
+<td>AGPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/openfisca/openfisca-policy">openfisca/openfisca-policy</a></td>
+<td>OpenFiscaの政策指向サーベイシミュレーションヘルパー。</td>
+<td>0</td>
+<td>Python</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PolicyEngine/policyengine-app">PolicyEngine/policyengine-app</a></td>
+<td>公共政策の影響を計算・可視化するWebアプリ。税制・給付政策のシミュレーション。</td>
+<td>67</td>
+<td>Python/TS</td>
+<td>AGPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PolicyEngine/policyengine.py">PolicyEngine/policyengine.py</a></td>
+<td>PolicyEngineのPythonパッケージ。税・給付モデルの可視化・分析統合。</td>
+<td>6</td>
+<td>Python</td>
+<td>AGPL-3.0</td>
+</tr>
+<tr>
+<td><a href="https://stapm-platform.github.io/">STAPM Platform</a></td>
+<td>公衆衛生政策シミュレーションのための技術基盤。英国Sheffield大学。</td>
+<td>-</td>
+<td>R/Python</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5. EBPMデータベース・知見集約</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/CyberAgentAILab/EBPMDB">CyberAgentAILab/EBPMDB</a></td>
+<td>証拠に基づく政策のための研究成果データベース。国内外の政策介入エビデンスをレビュー形式で集約。</td>
+<td>35</td>
+<td>TypeScript</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/nestauk/discovery_policy_atlas">nestauk/discovery_policy_atlas</a></td>
+<td>AIを活用した政策立案支援ツール（Policy Atlas）。</td>
+<td>5</td>
+<td>Python/TS</td>
+<td>AGPL-3.0</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>6. 政策文書分析・モニタリングツール</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/colossus-lab/openarg_backend">colossus-lab/openarg_backend</a></td>
+<td>アルゼンチン政府オープンデータのAI分析エンジン。マルチエージェント・NL2SQL・セマンティックキャッシング。</td>
+<td>139</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/policybot-io/UNREDACTED">policybot-io/UNREDACTED</a></td>
+<td>国家政府の支出・予算・債務・政策分析・政治家献金モニタリングのAIアプリ。</td>
+<td>5</td>
+<td>Python/TS</td>
+<td>独自</td>
+</tr>
+<tr>
+<td><a href="https://github.com/AgoraDMV/BillTrax">AgoraDMV/BillTrax</a></td>
+<td>米国議会法案のインテリジェンスプラットフォーム。法案テキストの構造化・資金変化追跡・AI要約。</td>
+<td>1</td>
+<td>Python/TS</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/christian-camille/uk-policy-tracker">christian-camille/uk-policy-tracker</a></td>
+<td>英政府・議会APIを取り込んだ政策トラッキングプラットフォーム。NLPエンティティマッチング・グラフ探索。</td>
+<td>0</td>
+<td>Python/TS</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/DU-CAID/policy-scoring-dashboard">DU-CAID/policy-scoring-dashboard</a></td>
+<td>政策文書（PDF/DOCX/TXT）をEBPMの5次元でスコアリングするダッシュボード。</td>
+<td>0</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/nelabdiel/diff_policies">nelabdiel/diff_policies</a></td>
+<td>政策文書の比較分析プラットフォーム。Ollama連携のAI分析機能付き。</td>
+<td>4</td>
+<td>Python/JS</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Varnasr/PolicyDhara">Varnasr/PolicyDhara</a></td>
+<td>インド開発政策の自動更新トラッカー。</td>
+<td>1</td>
+<td>Astro/JS</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td><a href="https://github.com/christian-arthur/ai-policy-advisor">christian-arthur/ai-policy-advisor</a></td>
+<td>ローカルLLMを用いた政策アドバイスのR/Python統合ツール。</td>
+<td>0</td>
+<td>R/Python</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>7. 日本のEBPM・オープンデータ関連</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/japan-opendata/awesome-japan-opendata">japan-opendata/awesome-japan-opendata</a></td>
+<td>日本のオープンデータ情報一覧・まとめ。</td>
+<td>162</td>
+<td>Markdown</td>
+<td>CC-BY-4.0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/CyberAgentAILab/EBPMDB">CyberAgentAILab/EBPMDB</a></td>
+<td>（重複）日本発のEBPM研究成果データベース。</td>
+<td>35</td>
+<td>TypeScript</td>
+<td>MIT</td>
+</tr>
+</tbody>
+</table>
+<h3>参考：日本政府・研究機関のEBPM関連ページ</h3>
+<ul>
+<li><a href="https://www.cao.go.jp/others/kichou/ebpm/ebpm.html">内閣府 EBPMへの取組</a> — 内閣府のEBPM推進体制・各局の取組紹介</li>
+<li><a href="https://www.gyoukaku.go.jp/ebpm/">行政改革推進会議 EBPMの推進</a> — 統計データ提供ガイドライン・行政事業レビュー支援</li>
+<li><a href="https://csds.rois.ac.jp/research/omd/pj4/">社会データ構造化センター 政府統計を用いたEBPM研究プロジェクト</a> — 公的ミクロデータを活用した因果的Evidenceの発信</li>
+</ul>
+<hr>
+<h2>8. その他の関連ツール・フレームワーク</h2>
+<table>
+<thead>
+<tr>
+<th>リポジトリ</th>
+<th>説明</th>
+<th>Stars</th>
+<th>言語</th>
+<th>ライセンス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/mikepsinn/optimitron/tree/main/packages/opg">mikepsinn/optimitron</a></td>
+<td>Optimal Policy Generator。因果エビデンス・厚生関数・Bradford Hill基準を用いた政策ランキング・スコアリング。</td>
+<td>-</td>
+<td>TypeScript</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://github.com/random-walks/factor-factory">random-walks/factor-factory</a></td>
+<td>ドメイン非依存の因子モデル＋分析パイプラインフレームワーク。DiD・SDID・SCM・RDDなどをプラガブルエンジンで統合。</td>
+<td>1</td>
+<td>Python</td>
+<td>MIT</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>カテゴリ別おすすめ（導入優先度）</h2>
+<h3>まず押さえておきたい「核」ライブラリ</h3>
+<ol>
+<li><strong>py-why/dowhy</strong> — 因果推論の全体像を学び・実装するのに最適</li>
+<li><strong>py-why/EconML</strong> — ML×計量経済学の最先端手法（DML・CATE推定）</li>
+<li><strong>uber/causalml</strong> — 政策効果の異質性分析・アップリフトモデリング</li>
+<li><strong>pymc-labs/CausalPy</strong> — ベイズ準実験分析の統合環境</li>
+</ol>
+<h3>政策評価の「定番」手法</h3>
+<ol>
+<li><strong>synth-inference/synthdid</strong> / <strong>igerber/diff-diff</strong> — DiD・Synthetic DiD</li>
+<li><strong>grf-labs/policytree</strong> — データ駆動型の政策ルール学習</li>
+</ol>
+<h3>制度シミュレーション</h3>
+<ol>
+<li><strong>openfisca/openfisca-core</strong> — 制・社会保障の「コード化」</li>
+<li><strong>PolicyEngine/policyengine-app</strong> — 政策影響の可視化・市民参加</li>
+</ol>
+<h3>日本のEBPMエコシステム</h3>
+<ol>
+<li><strong>CyberAgentAILab/EBPMDB</strong> — 日本語の政策エビデンスデータベース</li>
+<li><strong>japan-opendata/awesome-japan-opendata</strong> — 国内オープンデータの入口</li>
+</ol>
+<hr>
+<h2>補足：EBPMの手法カテゴリと対応ツール</h2>
+<table>
+<thead>
+<tr>
+<th>手法カテゴリ</th>
+<th>代表的手法</th>
+<th>対応ツール例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ランダム化較試験（RCT）</td>
+<td>A/Bテスト・Field Experiment</td>
+<td>DoWhy, CausalML</td>
+</tr>
+<tr>
+<td>差分の差分法（DiD）</td>
+<td>2×2 DiD, Callaway-Sant'Anna, Synthetic DiD</td>
+<td>synthdid, diff-diff, differences, azcausal, CausalPy</td>
+</tr>
+<tr>
+<td>合成制御法（SCM）</td>
+<td>Abadie et al. SCM, Generalized SCM</td>
+<td>coresynth, CausalPy</td>
+</tr>
+<tr>
+<td>回帰不連続設計（RDD）</td>
+<td>Sharp/Fuzzy RDD</td>
+<td>CausalPy, rdrobust (R)</td>
+</tr>
+<tr>
+<td>マッチング・重み付け</td>
+<td>Propensity Score, IPW, Covariate Balancing</td>
+<td>causallib, DoWhy, MatchIt (R)</td>
+</tr>
+<tr>
+<td>政策学習・最適化</td>
+<td>Policy Tree, Doubly Robust Learning</td>
+<td>policytree, EconML, confounding-robust-policy-improvement</td>
+</tr>
+<tr>
+<td>構造型モデリング・シミュレーション</td>
+<td>マイクロシミュレーション, ABM</td>
+<td>OpenFisca, ppi, STAPM</td>
+</tr>
+<tr>
+<td>因果探索</td>
+<td>ベイズネット, PCMCI</td>
+<td>DoWhy, tigramite</td>
+</tr>
+<tr>
+<td>時系列介入分析</td>
+<td>CausalImpact, Interrupted Time Series</td>
+<td>tfp-causalimpact, CausalPy, CImpact</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>本一覧はGitHub上の公開リポジトリを対象にしています。今後の追加・修正はPull RequestやIssueで歓迎します。</em></p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://watanabe3tipapa.github.io">Github</a></li>
+                                                        <li><a href="https://toolsmith.watanabe3ti.com">Toolsmith</a></li>
+                                                        <li><a href="http://watanabe3ti.txt-nifty.com/f2f/">BLOG</a></li>
+                                                        <li><a href="#">You can modify those links in your config file</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://pelican-white-paper.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://x.com/watanabe3tipapa">X</a></li>
+                                                        <li><a href="https://www.instagram.com/chombo_watanabe3tipapa/">Instagram</a></li>
+                                                        <li><a href="https://www.facebook.com/toru.watanabe3ti/">Facebook</a></li>
+                                                        <li><a href="#">You can add links in your config file</a></li>
+                                                        <li><a href="#">Another social link</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

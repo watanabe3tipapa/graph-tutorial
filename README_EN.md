@@ -1,6 +1,6 @@
 # graph-tutorial
 
-[![Version](https://img.shields.io/badge/version-v0.3.0-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
+[![Version](https://img.shields.io/badge/version-v0.4.0-blue.svg)](https://github.com/watanabe3tipapa/graph-tutorial/releases)
 [![Issues](https://img.shields.io/github/issues/watanabe3tipapa/graph-tutorial.svg)](https://github.com/watanabe3tipapa/graph-tutorial/issues)
 
 **EBPM. Collect data relentlessly, visualize it.**
@@ -29,7 +29,7 @@ codified pipeline of "fetch → shape → plot → publish".
 | Survey methods and repositories | EBPM GitHub resources organized into 8 categories |
 | Generate charts on demand | 4 chart types: category / stars / language / activity |
 
-> A deeper discussion of why this tool exists is in the "考察 / Consideration" tab of the LP.
+> A deeper discussion of why this tool exists is in the "Data Quality & Architecture" tab of the LP.
 
 ### Consideration: what kind of EBPM tools should we build?
 
@@ -38,7 +38,7 @@ codified pipeline of "fetch → shape → plot → publish".
 3. **Guarantee reproducibility with code** — an open pipeline can be reproduced by anyone
 4. **Keep tracking evidence** — automated collection keeps everything up to date
 5. **Relentless smoke tests (accuracy absolutism)** — data sources quietly break; correctness must be guarded by tests
-6. **The case for self-build** — EBPM tools should be built and used by yourself. Outsourcing to consultants is to be avoided: knowledge never stays in the organization, operations become contract-bound, and everything turns into a black box
+6. **The case for keeping in-house capabilities** — EBPM tools should keep data and analysis procedures inside the organization so they can be verified and continuously updated. External resources are fine, but reproducible, verifiable procedures should stay in-house
 
 ## Features
 
@@ -46,14 +46,14 @@ codified pipeline of "fetch → shape → plot → publish".
 - **Startup stale detection**: refreshes data automatically when it is outdated
 - **Degradation handling**: keeps existing data on API/network failure
 - **Hybrid data sources**: live API (`ESTAT_APP_ID` / `GITHUB_TOKEN`) + static fallback
-- **Loose-leaf notebook LP**: handwriting-style ruled lines, binder holes, and 7 divider tabs
+- **Loose-leaf notebook LP**: handwriting-style ruled lines, binder holes, and 5 divider tabs (Home / Demo / EBPM Catalog / Install / Data Quality)
+- **Clear demo-vs-local separation**: capability badges (try here / run locally / admin-only) and a data-status strip make it obvious where each feature works
 - **On-demand charts**: Chart.js charts for category / stars / language / activity
 - **WEB-UI (practical console)**: catalog search, sort, CSV/JSON export, detail modal, favorites (localStorage), URL-hash state sharing
 - **Data freshness badges**: shows the last update of each dataset and warns when data is old (works on GitHub Pages too)
-- **Collector run WEB-UI**: run each collector with one click from the "Data Collection" tab (server only)
+- **Collector run WEB-UI**: run each collector with one click from the "Install" tab (Step 3; server only)
 - **Accuracy absolutism**: `npm run smoke` data-integrity smoke tests run on every CI run
-- **Kitesurf info collection**: GitHub Pages LP + Cloudflare Worker call Kitesurf to fetch Markdown / HTML / screenshots / PDF / links (LLM natural-language instructions supported)
-- **Built-in LP tutorials**: usage guides embedded in the Info Collection / Data Collection / Usage tabs
+- **Arbitrary-URL collection is suspended**: until auth, rate limits, and destination controls are in place, the public LP exposes no arbitrary-URL input or run UI (the Worker is limited to server-side collector use)
 - **Modern SPA**: Vite + React + TypeScript (npm workspaces monorepo)
 
 ## Quick Start
@@ -107,12 +107,16 @@ export CF_TOKEN=...         # Cloudflare API token (permission: Browser Renderin
 | `CF_ACCOUNT_ID` | Cloudflare account ID (Kitesurf collector; skipped when unset) |
 | `CF_TOKEN` | Cloudflare API token (permission: Browser Rendering - Edit) |
 | `COLLECTOR_DISABLED` | Set to `1` to disable auto-collection and the scheduler |
+| `COLLECTOR_ADMIN_TOKEN` | Remote auth token for the admin API (`/api/collectors` / `/api/collect/:id` / `/api/audit`). When unset, the admin API is loopback-only (fail closed) |
+| `TRUST_PROXY` | Set to `1` to trust `X-Forwarded-For` (for IP checks behind a reverse proxy) |
+| `FAILURE_WEBHOOK_URL` | Webhook URL for collection-failure notifications (Slack / Teams, etc.). No notification when unset |
+| `FAILURE_NOTIFY_INTERVAL_MINUTES` | Failure-notification cooldown per collector (minutes, default 360) |
 
 ## Client Build-time Variables
 
 | Variable | Description |
 |---|---|
-| `VITE_KITESURF_WORKER_URL` | Cloudflare Worker URL (used by the "Info Collection" tab to call Kitesurf; degraded display when unset). Set it as the GitHub Actions secret `VITE_KITESURF_WORKER_URL` |
+| `VITE_KITESURF_WORKER_URL` | Cloudflare Worker URL (for server-side collector use; the public LP's info-collection UI is suspended until security controls are in place) |
 
 ## Architecture
 
@@ -135,22 +139,21 @@ graph-tutorial/
 │   └── src/index.ts        # POST /collect (LLM instructions) + GET /snapshot + CORS
 └── client/                 # Vite + React + TypeScript SPA
     └── src/
-        ├── App.tsx                 # loose-leaf tab navigation (URL-hash sync)
+        ├── App.tsx                 # loose-leaf tab navigation (ARIA Tabs + URL-hash sync)
         ├── hash.ts                 # URL sync of tab / filter state
         ├── download.ts             # CSV / JSON export (tested)
         ├── repoStats.ts            # chart aggregation (pure functions, tested)
-        ├── kitesurf.ts             # Worker client (VITE_KITESURF_WORKER_URL)
         └── components/             # tab implementations
-            ├── Consideration.tsx     # Consideration
-            ├── Framework.tsx         # Data Collection (collector run WEB-UI + internals)
-            ├── PopulationView.tsx    # population chart (+ PopulationChart.tsx)
-            ├── ReposView.tsx         # EBPM repositories (+ ReposChart.tsx)
-            ├── Catalog.tsx           # catalog (search, sort, export, favorites)
+            ├── Home.tsx              # Home (hero + 3 CTAs + data-status strip + demo/local comparison)
+            ├── CapabilityBadge.tsx   # capability badge (demo / local / admin / suspended)
+            ├── DataStatusStrip.tsx   # data-status strip (acquisition date, counts, freshness)
+            ├── PopulationView.tsx    # population demo (+ PopulationChart.tsx)
+            ├── Catalog.tsx           # EBPM catalog (explore / overview segments)
             ├── RepoModal.tsx         # repository detail modal
             ├── FreshnessBadge.tsx    # data freshness badge
             ├── CollectorControls.tsx # collector run WEB-UI
-            ├── KitesurfConsole.tsx   # info collection (simple / LLM natural language)
-            └── Usage.tsx             # usage (LP tab guide + developer guide)
+            ├── Usage.tsx             # Install (3 steps)
+            └── Quality.tsx           # Data Quality & Architecture (sources, freshness, design philosophy)
 ```
 
 ## API
@@ -161,6 +164,7 @@ graph-tutorial/
 | `GET /api/repos` | EBPM repository catalog (categories / repos / isLive / sourceUrl / collectedAt) |
 | `GET /api/collectors` | Registered collectors (id / name / cron / collectedAt / stale) |
 | `POST /api/collect/:id` | Run a collector (returns ok / skipped / error as JSON) |
+| `GET /api/audit` | Audit log (recent run history, protected like the admin API) |
 
 ### Cloudflare Worker endpoints
 
@@ -178,13 +182,29 @@ graph-tutorial/
 
 ## Cloudflare Kitesurf Integration
 
-graph-tutorial uses a **GitHub Pages (LP / client) + Cloudflare Workers (info collection server)**
+graph-tutorial's backend uses a **GitHub Pages (LP / client) + Cloudflare Workers (info collection server)**
 setup to leverage Kitesurf (Browser Run's lightweight, agent-friendly browser).
 
-- **LP "Info Collection" tab**: specify URL + action (Markdown / HTML / screenshot / PDF / links),
-  or give an **LLM natural-language instruction** (Workers AI parses it into `{url, action}`)
-- **Worker**: `POST /collect` (CORS-aware / input validation), Cron + KV periodic snapshots (`GET /snapshot`)
+> **Suspended for public use**: arbitrary-URL info collection (Kitesurf) exposes no UI on the public LP
+> until auth, rate limits, and destination controls are in place. The Worker is limited to the
+> server-side collector (`server/collectors/kitesurf-snapshot`) and does not accept arbitrary URL runs
+> from the public.
+
+- **Worker**: `POST /collect` (auth required, destination allowlist, per-IP rate limit), Cron + KV periodic snapshots (`GET /snapshot`)
 - **Server-side collector**: `server/collectors/kitesurf-snapshot` (enabled via `.env` `CF_ACCOUNT_ID` / `CF_TOKEN`)
+
+## Security Design
+
+Management and collection features that can be exposed externally fail closed — nothing runs without authentication.
+
+| Target | Control |
+|---|---|---|
+| Worker `POST /collect` | Disabled (503) unless `COLLECTOR_TOKEN` is set via `wrangler secret put`. Wrong token → 401. Destination restricted to the `ALLOWED_URL_PREFIXES` allowlist (default: only this project). Private / metadata / special-purpose hosts (SSRF) are blocked. Per-IP hourly limit (`COLLECT_RATE_LIMIT`, default 30). LLM mode (`instruction`) requires `consent: true` |
+| Admin API (`/api/collectors` / `/api/collect/:id` / `/api/audit`) | Loopback-only by default. Remote access requires `COLLECTOR_ADMIN_TOKEN` matching the `x-admin-token` header. Remote without a token → 403 |
+| Read-only API (`/api/population` / `/api/repos`) | No auth (public data reads only) |
+| Data quality | `npm run smoke` verifies counts, categories, duplicates, value ranges, freshness (90 days), and source URLs in CI. The collector parser is DOM-based (cheerio) with contract tests for structural changes. Collector output is structurally validated with JSON Schema (ajv) |
+| Monitoring | Collection failures are posted to `FAILURE_WEBHOOK_URL` (with cooldown). Every run is recorded in the audit log (`GET /api/audit`) |
+| Accessibility | `eslint-plugin-jsx-a11y` is part of the CI lint (keyboard operability, labels, roles) |
 
 ## Documentation
 
@@ -193,10 +213,10 @@ setup to leverage Kitesurf (Browser Run's lightweight, agent-friendly browser).
 ## Tests
 
 ```sh
-npm test        # Vitest (18 tests)
-npm run lint    # ESLint
+npm test        # client Vitest (20 tests) + server node:test (17 tests)
+npm run lint    # ESLint (includes a11y rules)
 npm run build   # typecheck + Vite build
-npm run smoke   # data-integrity smoke test
+npm run smoke   # data-integrity smoke test (counts, freshness, duplicates, value ranges) in CI
 ```
 
 ## License

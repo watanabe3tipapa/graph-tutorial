@@ -30,6 +30,25 @@ module.exports = {
   name: '日本の総人口（e-Stat）',
   cron: '0 4 * * *',
   staleAfterMs: 30 * 24 * 60 * 60 * 1000,
+  schema: {
+    type: 'object',
+    required: ['labels', 'data', 'unit', 'source'],
+    additionalProperties: true,
+    properties: {
+      labels: {
+        type: 'array',
+        minItems: 1,
+        items: { type: 'string', pattern: '^\\d{4}$' }
+      },
+      data: {
+        type: 'array',
+        minItems: 1,
+        items: { type: 'number', minimum: 10000000, maximum: 500000000 }
+      },
+      unit: { type: 'string' },
+      source: { type: 'string' }
+    }
+  },
   collect: collect,
   validate: validate
 };

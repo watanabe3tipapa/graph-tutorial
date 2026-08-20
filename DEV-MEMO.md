@@ -9,8 +9,8 @@ Evidence-Based Policy Making（EBPM）のための「エビデンス・パイプ
 自律型コレクタで収集・更新し、ルーズリーフ・ノート調の LP で可視化する。
 
 - リポジトリ名: graph-tutorial
-- バージョン: v0.3.0
-- 最終更新: 2026-08-17
+- バージョン: v0.4.0
+- 最終更新: 2026-08-21
 
 ## 技術スタック
 
@@ -42,7 +42,8 @@ graph-tutorial/
 │   ├── app.js            # API: /api/population, /api/repos + 静的配信
 │   ├── bin/www           # サーバ起動 + コレクタ起動フック
 │   ├── collectors/       # 自律型コレクタ（1フォルダ = 1データ源）
-│   │   ├── ebpm-repos/collector.js
+│   │   ├── ebpm-repos/collector.js   # cheerio DOM パーサ（見出し→直後の表、列見出し名で特定）
+│   │   │   └── fixtures/source.html  # 収集元 HTML スナップショット（契約テスト用）
 │   │   ├── estat-population/collector.js
 │   │   └── kitesurf-snapshot/collector.js   # Kitesurf で README 収集（CF_* 設定時）
 │   ├── lib/
@@ -51,30 +52,32 @@ graph-tutorial/
 │   │   ├── github.js               # GitHub API 取得 + フォールバック
 │   │   └── kitesurf.js             # Kitesurf REST API ラッパ（/markdown）
 │   ├── data/                       # コレクタ出力（collectedAt 付き）
-│   └── scripts/
-│       ├── run-collectors.js       # CLI
-│       └── smoke-test.js           # データ整合性スモークテスト
+│   ├── scripts/
+│   │   ├── run-collectors.js       # CLI
+│   │   └── smoke-test.js           # データ整合性スモークテスト（件数・鮮度・重複・値域）
+│   └── test/                       # node:test（admin-api / ebpm-repos 契約テスト）
 ├── worker/               # Cloudflare Workers（情報収集サーバー）
-│   ├── wrangler.toml     # browser / ai / kv バインディング + cron + vars
-│   ├── package.json      # wrangler / workers-types
-│   └── src/index.ts      # POST /collect（LLM 指示対応）・GET /snapshot・CORS
+│   ├── wrangler.toml     # browser / ai / kv バインディング + cron + vars（COLLECTOR_TOKEN は secret）
+│   └── src/index.ts      # POST /collect（認証・宛先許可リスト・レート制限）・GET /snapshot・CORS
 └── client/               # Vite + React SPA（ルーズリーフ調 LP）
     ├── src/
-    │   ├── App.tsx                 # タブナビ（考察/よくあるやつ/EBPMリポジトリ/カタログ/データ収集/情報収集/使い方）＋URLハッシュ同期
+    │   ├── App.tsx                 # タブナビ（ホーム/デモ/EBPMカタログ/導入する/データ品質・仕組み）＋ARIA Tabs・URLハッシュ同期
     │   ├── hash.ts                 # タブ / フィルタ状態の URL 同期
     │   ├── download.ts             # CSV / JSON エクスポート（テスト済み）
     │   ├── repoStats.ts            # グラフ集計（純関数・テスト済み）
     │   ├── api.ts                  # API 取得 + 静的フォールバック
     │   └── components/
-    │   ├── Consideration.tsx   # EBPM ツールの考察（LP 冒頭・セルフビルドのすすめ）
-    │   ├── Framework.tsx       # データ収集フレームワーク解説
-    │   ├── Usage.tsx           # 使い方
-    │   ├── Catalog.tsx         # カタログ（検索・ソート・CSV/JSON出力・お気に入り）
+    │   ├── Home.tsx            # ホーム（ヒーロー + 3CTA + データ状態ストリップ + 公開/ローカル比較表）
+    │   ├── CapabilityBadge.tsx # 環境バッジ（デモ / ローカル / 運用者 / 公開停止）
+    │   ├── DataStatusStrip.tsx # データ状態ストリップ（取得日・件数・鮮度）
+    │   ├── Quality.tsx         # データ品質・仕組み（出典・更新・再現・設計思想）
+    │   ├── Usage.tsx           # 導入する（3ステップ）
+    │   ├── Catalog.tsx         # EBPMカタログ（探索 / 概観の2セグメント）
     │   ├── RepoModal.tsx       # リポジトリ詳細モーダル
     │   ├── PopulationView.tsx / PopulationChart.tsx
-    │   ├── ReposView.tsx / ReposChart.tsx
-    │   ├── CollectorControls.tsx   # コレクタ実行 WEB-UI
-    │   └── KitesurfConsole.tsx     # 情報収集指示（シンプル / LLM 自然言語）
+    │   ├── ReposChart.tsx
+    │   ├── FreshnessBadge.tsx  # データ鮮度バッジ
+    │   └── CollectorControls.tsx   # コレクタ実行 WEB-UI
     │   └── test/setup.ts           # jsdom 互換（localStorage ポリフィル）
 ```
 
@@ -108,32 +111,40 @@ module.exports = {
 
 1. **コレクタの検証**: `validate()` が取得データのスキーマを確認
 2. **劣化処理**: 取得失敗時は既存データを保持
-3. **継続的スモークテスト**: `npm run smoke`（`server/scripts/smoke-test.js`）が保存済みデータの整合性を検証。CI 上でも毎回実行
+3. **継続的スモークテスト**: `npm run smoke`（`server/scripts/smoke-test.js`）が保存済みデータの
+   整合性を検証。件数・カテゴリ・重複・値域・鮮度（90日）を CI 上でも毎回実行
+4. **契約テスト**: `ebpm-repos` のパーサは fixture を元に `server/test/ebpm-repos.test.js` で
+   見出しと表の対応・列見出し特定を検証。収集元の構造変化を早期に検知
 
-## 考察（LP 冒頭）
+## 考察（LP 冒頭 →「データ品質・仕組み」タブ）
 
-LP の「考察」タブでは、EBPM ツールのあるべき姿を6点で論じている。
+LP の「データ品質・仕組み」タブでは、EBPM ツールのあるべき姿を設計思想として論じている。
 
 1. データへのアクセスを開く
 2. 分析手法を民主化する
 3. 再現性と透明性をコードで保証する
 4. エビデンスを追い続ける
 5. たゆまぬスモークテスト（正確性至上主義）
-6. **提唱: セルフビルドのすすめ** — 「自分で作って、自分で使う」が正しい。第三者委託は知識が組織に残らない・運用が契約依存になる等の理由で避けるべき
+6. **提唱: 継続運用できる内製能力を残す** — データと分析手順が組織に残り、変化に追随して更新できる状態を目指す。外部リソースも活用しつつ、検証と再現の手順を組織内に残すことを設計原則とする（第三者委託の完全否定ではなく、内製能力を残すための原則として再表現）
 
 ## WEB-UI（実用コンソール）
 
 クライアント完結で実装（GitHub Pages でも動作）。
 
+- **5タブ構成**: ホーム（ヒーロー + 3CTA + データ状態ストリップ + 公開/ローカル比較表）・デモ（人口）・
+  EBPMカタログ（探索/概観）・導入する（3ステップ）・データ品質・仕組み（出典・鮮度・再現・設計思想）
+- **環境バッジ**（`CapabilityBadge.tsx`）: 機能の実行場所を「このページで試せます / ローカルで実行 /
+  運用者向け / 実験機能・公開停止中」で明示し、実行できないボタンを置かない
+- **データ状態ストリップ**（`DataStatusStrip.tsx`）: 人口・OSS のデータ種別・対象期間・取得日をホームに集約表示
 - **カタログ検索 / ソート**（★・名前・言語・更新）
 - **CSV / JSON エクスポート**（BOM 付き CSV、Excel 対応）
 - **リポジトリ詳細モーダル**（ESC / オーバーレイで閉じる）
 - **お気に入り**（localStorage `ebpm-favorites` + 「お気に入りのみ」絞り込み）
 - **日本の人口**: 年範囲選択・年別テーブル・CSV 出力
-- **URL ハッシュ同期**: `#repos?cat=...` / `#catalog?q=...&sort=...` で状態を共有・復元
+- **URL ハッシュ同期**: `#catalog?view=overview&q=...&sort=...` で状態を共有・復元
 - **データ鮮度バッジ**（`FreshnessBadge.tsx`）: `collectedAt` から「データ更新: YYYY-MM-DD」を表示。7日以上経過で「古い可能性があります」と警告（静的フォールバックにも `collectedAt` を同梱し、Pages でも動作）
-- **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「データ収集」タブでコレクタ一覧（cron / 最終更新 / ステイル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
-- **情報収集指示 UI**（`KitesurfConsole.tsx`）: 「情報収集」タブで Cloudflare Worker 経由の Kitesurf 収集を実行。シンプルモード（URL + アクション選択）と LLM モード（自然言語指示）を切り替え。`VITE_KITESURF_WORKER_URL` 未設定なら劣化表示
+- **コレクタ実行 WEB-UI**（`CollectorControls.tsx`）: 「導入する」タブ Step 3 でコレクタ一覧（cron / 最終更新 / ステイル警告）と「実行」ボタンを表示。実行結果をインライン表示（成功 / スキップ / 失敗）。サーバ起動時のみ有効で、Pages では「サーバ起動時のみ利用できます」に劣化表示
+- **情報収集 UI は公開停止**（SEC-01 対応）: 任意URLの情報収集（Kitesurf）は、認証・利用量制限・宛先制御などの安全対策が完了するまで公開 LP に UI を置かない。方針は「データ品質・仕組み」タブに明記
 
 ## Cloudflare Kitesurf 連携（v0.3.0）
 
@@ -255,12 +266,55 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 | `CF_ACCOUNT_ID` | Cloudflare アカウント ID（Kitesurf コレクタ用） |
 | `CF_TOKEN` | Cloudflare API トークン（権限: Browser Rendering - Edit） |
 | `COLLECTOR_DISABLED` | `1` で自動収集・スケジューラを無効化 |
+| `COLLECTOR_ADMIN_TOKEN` | 管理 API（`/api/collectors`・`/api/collect/:id`）のリモート認証トークン。未設定なら管理 API はループバックのみ許可（fail closed） |
+| `TRUST_PROXY` | `1` で `X-Forwarded-For` を信頼（リバースプロキシ配下の IP 判定用） |
 
 クライアントビルド時:
 
 | 変数 | 説明 |
 |------|------|
-| `VITE_KITESURF_WORKER_URL` | Cloudflare Worker の URL（未設定なら「情報収集」タブは劣化表示） |
+| `VITE_KITESURF_WORKER_URL` | Cloudflare Worker の URL（サーバー側コレクタ運用用。公開 LP の情報収集 UI は公開停止中） |
+
+## セキュリティ対策（SEC-01 / SEC-02 対応）
+
+監査で指摘された「認証・レート制限・宛先制御の欠如」を fail closed で解消した。
+
+### Worker（任意URL収集）
+
+- `COLLECTOR_TOKEN`（`wrangler secret put` で設定）が無い限り `POST /collect` は **503** で無効化
+- トークン不一致は **401**。呼出元 IP ごとに時間あたり上限（`COLLECT_RATE_LIMIT` 既定 30、KV カウンタ + TTL で実装）
+- 宛先は `ALLOWED_URL_PREFIXES` の許可リストに限定。未設定なら自プロジェクトのみ（fail closed）
+- Cron（`scheduled`）は `runAction` を直接呼ぶためトークン不要のまま動作
+
+### Express 管理 API
+
+- `GET /api/collectors` / `POST /api/collect/:id` に `requireAdmin` ミドルウェアを追加
+- ループバック（`127.0.0.1` / `::1`）はローカル WEB-UI・Vite プロキシ用に許可
+- リモートは `COLLECTOR_ADMIN_TOKEN` が未設定なら **403**、設定時は `x-admin-token` 一致（SHA-256 ダイジェストの `timingSafeEqual` 比較）で **200**、不一致は **401**
+- リバースプロキシ配下は `TRUST_PROXY=1` で `X-Forwarded-For` を信頼（`app.set('trust proxy', true)`）
+- 閲覧 API（`/api/population`・`/api/repos`）は認証不要のまま
+
+## データ品質の強化（DATA-01 / DATA-02 対応）
+
+### スモークテストの強化（`server/scripts/smoke-test.js`）
+
+「壊れていない」だけでなく「期待どおり」を検証するよう拡張:
+
+- 件数・カテゴリ数の許容レンジ（repos 20〜200 / カテゴリ 5〜20）
+- 重複ゼロ（owner/name・categories）、owner/name の文字形式
+- stars の値域（0〜1,000,000、null は「未取得」として許容）
+- 人口データ: ラベルが4桁の昇順・重複なし、値域（10M〜500M）、unit/source の存在
+- **鮮度**: `collectedAt` が 90 日以内（超過で CI 失敗）
+- kitesurf スナップショット: 本文 100 文字以上 + 鮮度
+
+### ebpm-repos パーサの DOM 化（DATA-02）
+
+正規表現の「見出しと表のインデックス対応」を廃止し、cheerio で文書構造を辿る方式に変更:
+
+- 番号付き `<h2>` の直後（`nextAll('table').first()`）の表を紐付ける → 表の挿入・見出しの追加に強い
+- 列は位置ではなく `thead` の見出し名で特定（リポジトリ / 説明 / Stars / 言語 / ライセンス）
+- `parseHtml()` を純関数として export し、fixture（`server/collectors/ebpm-repos/fixtures/source.html`）を元に契約テストを追加（`server/test/ebpm-repos.test.js`）
+- テスト実行: `node --test`（`server/test/*.test.js`、11 tests）。ルート `npm test` は client + server を実行
 
 ## データ源
 
@@ -357,3 +411,115 @@ npm run smoke     # データ整合性スモークテスト
 - **README / README_EN**: 7タブ構成 / worker/ / Kitesurf 連携を反映しブラッシュアップ
 - **テスト環境**: Node 25 + jsdom で `localStorage.clear is not a function` が発生するため、
   `client/src/test/setup.ts` に localStorage ポリフィルを追加（18 tests）
+
+## 追録 2026-08-20: 監査指摘（SEC / DATA）への対処
+
+外部監査で指摘されたリスクのうち、以下の即時〜短期項目に対処した。
+
+### SEC-01（任意URL収集 Worker）
+
+- `POST /collect` を認証必須化（`COLLECTOR_TOKEN` secret、未設定は 503 = fail closed、不一致 401）
+- 宛先許可リスト `ALLOWED_URL_PREFIXES`（未設定なら自プロジェクトのみ）
+- 呼出元 IP 単位の時間あたりレート制限 `COLLECT_RATE_LIMIT`（既定 30、KV カウンタ + TTL 3600）
+- `wrangler.toml` に vars を追記。`npx wrangler secret put COLLECTOR_TOKEN` で設定
+- 注意: 反映には `npm run worker:deploy` が必要（今回は未デプロイ）
+
+### SEC-02（コレクタ起動 API）
+
+- `GET /api/collectors` / `POST /api/collect/:id` に `requireAdmin` を追加
+- ループバック許可 + `COLLECTOR_ADMIN_TOKEN` によるリモート認証（`timingSafeEqual` 比較）
+- `server/test/admin-api.test.js` で 4 シナリオを検証（ループバック 200 / トークン無し 403 /
+  トークン一致 200 / 不一致 401）。閲覧 API は認証不要のまま
+
+### DATA-01（スモークテスト強化）
+
+- 件数・カテゴリ数のレンジ、重複ゼロ、owner/name 形式、stars 値域、人口の年・値域、
+  鮮度 90 日以内を検証するよう `smoke-test.js` を拡張
+
+### DATA-02（HTML パーサの DOM 化）
+
+- `ebpm-repos` を cheerio ベースに書き換え（番号付き h2 → 直後の table、列見出し名で列特定）
+- `parseHtml()` を export し、fixture + 契約テスト（`server/test/ebpm-repos.test.js`、6 tests）を追加
+- サーバーテスト導入: `npm run test -w server`（node --test）。ルート `npm test` が client + server を実行
+
+### 残タスク（未着手）
+
+- Worker の DNS 解決後の非グローバル IP / メタデータ IP 遮断、LLM モードの同意 UI
+- 失敗通知（GitHub Issue / メール）、コレクタの JSON Schema バリデーション
+- 管理画面 / 監査ログ、E2E / a11y テストの CI 常設
+
+## 追録 2026-08-21: 監査の残タスク対処（SSRF / 同意 / 通知 / スキーマ / 監査 / a11y）
+
+SEC-01 の残タスクと中期監査項目を実装した。
+
+### SSRF 対策（worker/src/url-security.ts）
+
+- ホスト名 / IP リテラル検査でプライベート・ループバック・リンクローカル・メタデータ（169.254.169.254 等）・
+  ULA・特殊用途 IPv4（RFC1918 / CGNAT / TEST-NET / マルチキャスト / 予約）を遮断
+- `localhost`・`.local`・`.internal`・`.localhost` 等の内部ホスト名も拒否
+- IPv6 は `::1` / `fc00::/7` / `fe80::/10` / `::ffff:`（IPv4 マッピング）を検査
+- `REDIRECT_CHECK=1`（既定オフ）でリダイレクト先も許可リスト・安全性を検証（DNS rebinding 対策）
+- 検査は純関数化し、vitest で単体テスト（`worker/src/url-security.test.ts`、7 tests）を追加。
+  CI の `npm run test -w worker` で毎回実行
+
+### LLM モードの同意（worker/src/index.ts）
+
+- `instruction`（LLM 指示）利用時は `consent: true` が必須（無ければ 400）。
+  Workers AI へ指示文と URL が送信される旨と、機密情報を送らない注意をエラー文で明示
+
+### コレクタの JSON Schema バリデーション
+
+- `server/lib/collector-registry.js` に ajv を導入。コレクタ定義の `schema` があれば構造検証（未定義なら従来の `validate()`）
+- `ebpm-repos`（repos minItems 1 / カテゴリ minItems 5 / owner・name の形式 / stars の値域）と
+  `estat-population`（ラベル 4 桁年 / 値域 10M〜500M）に schema を定義
+- 契約テストを追加（`server/test/registry.test.js`）: スキーマ違反は失敗扱い / 適合データは保存 / 監査ログ記録 / 通知とクールダウン
+
+### 失敗通知（server/lib/notify.js）
+
+- `FAILURE_WEBHOOK_URL` に失敗情報（コレクタ名 / エラー / 既存データ有無）を POST（Slack 等の汎用ウェブフック）
+- 同一コレクタは `FAILURE_NOTIFY_INTERVAL_MINUTES`（既定 360 分）間クールダウンし、障害継続時の通知量を抑制
+- 未設定なら何もしない（後方互換）
+
+### 監査ログ（server/lib/audit.js + GET /api/audit）
+
+- 全コレクタ実行（成功 / 失敗 / スキップ）を `server/data/audit.jsonl`（gitignore 済み）に記録
+  - 項目: ts / collector / source（cli / startup / scheduler / api）/ status / error / keptExisting / durationMs
+- `GET /api/audit`（`requireAdmin` 保護）で直近 50 件（`?limit=` で 500 まで）を取得
+- WEB-UI（`CollectorControls.tsx`）に「実行履歴（監査ログ）」を表示。実行後は自動リロード
+- 監査ログ・通知状態ファイルを `.gitignore` に追加
+
+### E2E / a11y テストの CI 常設
+
+- `eslint-plugin-jsx-a11y` を導入し lint で CI 常設の a11y 検査を開始
+- 指摘を修正: RepoModal を再構成（背景クリックを `role="button"` の overlay ボタン化、ダイアログは sibling 化）し、
+  キーボード操作を保証。スクロール可能な監査ログ領域は WAI-ARIA 推奨どおり tabIndex でフォーカス可能に
+- CI（`ci.yml`）に worker テスト（vitest）と worker 型チェックを追加
+
+### 検証結果
+
+- `npm run lint` / `npm test`（client 20 + server 17）/ `npm run test -w worker`（7）/ `npm run typecheck -w worker` /
+  `npm run build` / `npm run smoke` すべて成功
+
+### デプロイ状況（2026-08-21）
+
+- `npm run worker:deploy` で本番デプロイ済み。Version ID: `e5fb83d3-fc41-4034-9f1d-a4314e968dd1`
+- `npx wrangler secret put COLLECTOR_TOKEN` で secret を設定済み（トークン値はコミットしない。
+  運用側のシークレット管理に保存し、必要に応じてローテーションすること）
+- 実機検証: 正常系 markdown 200 / SSRF 遮断（169.254.169.254）403 / 許可リスト外 403 /
+  LLM 同意なし 400 / トークンなし 401 / snapshot 200 を確認
+- 注意: `waitUntil` の指定値は Browser Run の仕様に従う（`commit` 等の不正値は 502 になる）
+
+### 監査ログ / 通知の運用注意
+
+- 監査ログ・通知状態は `server/data/` に書き出されるため、コンテナ/サーバの永続領域を確保すること
+
+## 追録 2026-08-21: v0.4.0 リリース
+
+監査指摘（SEC / DATA）の全項目への対処と残タスク実装を完了し、v0.4.0 としてリリース。
+
+- バージョン: 全ワークスペース（root / client / server / worker）と `package-lock.json`、README / README_EN の
+  バッジ、DEV-MEMO のバージョン表記を v0.4.0 に更新
+- 内容: SEC-01（Worker 認証・レート制限・宛先制御・SSRF 遮断・LLM 同意）・SEC-02（管理 API 認可）・
+  DATA-01（スモークテスト強化）・DATA-02（DOM パーサ化＋契約テスト）・JSON Schema バリデーション・
+  失敗通知・監査ログ・a11y lint 常設・Worker 本番デプロイ
+- テスト: client 20 / server 17 / worker 7、lint・build・smoke・worker typecheck すべて成功

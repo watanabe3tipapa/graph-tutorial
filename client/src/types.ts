@@ -36,6 +36,16 @@ export interface CollectorInfo {
   stale: boolean
 }
 
+export interface AuditEntry {
+  ts: string
+  collector: string
+  source: string
+  status: string
+  error: string | null
+  keptExisting: boolean | null
+  durationMs: number
+}
+
 export type KitesurfAction = 'markdown' | 'content' | 'screenshot' | 'pdf' | 'links'
 
 export interface KitesurfCollectRequest {
